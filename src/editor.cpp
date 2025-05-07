@@ -297,20 +297,41 @@ void DMEditorLayer::updateMarkers(float) {
 }
 
 
-bool DMControlPanel::setup() {
-  this->setTitle("DeathMarkers Control Panel");
-
+bool DMControlPanel::setup(float anchorX, float anchorY, const char* bg = "GJ_square06.png") {
 	this->setID(PANEL_ID);
+
+	auto anchor = CCPoint(anchorX, anchorY);
+	m_size = CCSize(120, 80);
+	this->setContentSize(m_size);
+	this->setPosition(anchor);
+
+  m_bgSprite = cocos2d::extension::CCScale9Sprite::create(bg, { 0, 0, 80, 80 });
+  m_bgSprite->setContentSize(m_size);
+  m_bgSprite->setPosition(m_size / 2);
+	this->addChild(m_bgSprite);
+
+	cocos2d::CCLabelBMFont* m_title = cocos2d::CCLabelBMFont::create("DeathMarkers Control Panel", "goldFont.fnt");
+	m_title->setAnchorPoint(CCPoint(0.5f, 0.5f));
+	m_title->setScale((m_size.width - 20) / m_title->getContentWidth());
+	m_title->setPosition(m_size.width / 2, m_size.height - 1.2f * m_title->getContentHeight() * m_title->getScale());
+	this->addChild(m_title);
+  //this->setKeypadEnabled(false);
+  //this->setTouchEnabled(false);
+
 	//this->m_editor = static_cast<DMEditorLayer*>(LevelEditorLayer::get());
   // put stuff in
 
   return true;
 }
 
+
 DMControlPanel* DMControlPanel::create() {
+	//if (instance) return instance;
   auto ret = new DMControlPanel();
-  if (ret->initAnchored(240.f, 160.f, "GJ_square07.png")) {
-      ret->autorelease();
+  auto winSize = cocos2d::CCDirector::get()->getWinSize();
+  if (ret->setup(winSize.width - 230, winSize.height - 130)) {
+      //ret->autorelease();
+      //return instance = ret;
       return ret;
   }
 
@@ -318,16 +339,10 @@ DMControlPanel* DMControlPanel::create() {
   return nullptr;
 }
 
-#include <Geode/modify/EditorPauseLayer.hpp>
-class $modify(DMEditorPauseLayer, EditorPauseLayer) {
 
-	struct Fields {
-		CCMenuItemSprite* m_button;
-	};
+bool DMEditorPauseLayer::init(LevelEditorLayer * layer) {
 
-	bool init(LevelEditorLayer * layer) {
-
-		if (!EditorPauseLayer::init(layer)) return false;
+	if (!EditorPauseLayer::init(layer)) return false;
 
 		auto editor = static_cast<DMEditorLayer*>(layer);
 		auto offSprite = CircleButtonSprite::createWithSprite(
@@ -355,12 +370,10 @@ class $modify(DMEditorPauseLayer, EditorPauseLayer) {
 			this->m_fields->m_button->selected() :
 			this->m_fields->m_button->unselected();
 
-		auto menu = this->getChildByID("guidelines-menu");
-		menu->addChild(this->m_fields->m_button);
-		menu->updateLayout(true);
+	auto menu = this->getChildByID("guidelines-menu");
+	menu->addChild(this->m_fields->m_button);
+	menu->updateLayout(true);
 
-		return true;
+	return true;
 
-	}
-
-};
+}
