@@ -44,7 +44,6 @@ CCNode* DeathLocationMin::createAnimatedNode(
 
 CCNode* DeathLocationMin::createNode(bool isCurrent, bool preAnim) const {
 	auto sprite = CCSprite::create("death-marker.png"_spr);
-	std::string const id = "marker"_spr;
 	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
 
 	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
