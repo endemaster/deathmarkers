@@ -38,6 +38,12 @@ const md = require("markdown-it")({ html: true, breaks: true })
 const { Readable } = require("stream");
 
 app.use(expr.static("front"));
+app.set('trust proxy', 1);
+const rateLimit = require("express-rate-limit").rateLimit({
+  windowMs: 8 * 1000, // 8 seconds
+  limit: 2,
+  skipFailedRequests: true
+});
 
 const outline = fs.readFileSync("./outline.html", "utf8");
 const guideHtml = {};
@@ -158,7 +164,7 @@ function createUserIdent(userid, username, levelid) {
   return crypto.createHash("sha1").update(source).digest("hex");
 }
 
-app.get("/list", async (req, res) => {
+app.get("/list", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   if (req.query.platformer != "true" && req.query.platformer != "false")
@@ -181,7 +187,7 @@ app.get("/list", async (req, res) => {
   benchmark();
 });
 
-app.get("/analysis", async (req, res) => {
+app.get("/analysis", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   let levelId = parseInt(req.query.levelid);
@@ -209,7 +215,7 @@ app.get("/analysis", async (req, res) => {
   benchmark();
 });
 
-app.all("/submit", expr.text({
+app.all("/submit", rateLimit, expr.text({
   type: "*/*"
 }), async (req, res) => {
   benchmark("parseSubmission");
