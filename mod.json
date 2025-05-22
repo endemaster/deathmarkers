@@ -131,6 +131,16 @@
 				"slider-step": 1,
 				"input": true
 			}
+		},
+		"title-advanced": {
+			"type": "title",
+			"name": "Advanced"
+		},
+		"server-url": {
+			"type": "string",
+			"name": "Server URL",
+			"description": "This controls where your deaths are requested from and sent to. <cr>You should not change this unless you know what you are doing.</c> Should end in /, but will be fixed automatically.",
+			"default": "https://deathmarkers.masp005.dev/"
 		}
 	},
 	"resources": {

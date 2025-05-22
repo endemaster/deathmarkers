@@ -99,7 +99,6 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 		);
 
 		// Build the HTTP Request
-		std::string const url = API_BASE + "analysis";
 		web::WebRequest req = web::WebRequest();
 
 		req.param("levelid", levelId);
@@ -107,7 +106,7 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 		req.userAgent(HTTP_AGENT);
 		req.timeout(HTTP_TIMEOUT);
 
-		this->m_fields->m_listener.setFilter(req.get(url));
+		this->m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("analysis")));
 
 	}
 
@@ -226,7 +225,7 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 				fmt::format("{} deaths were found.", this->m_fields->m_deaths.size()),
 				"Continue", "Open Guide",
 				[](auto, bool open) {
-					if (open) web::openLinkInBrowser(API_BASE);
+					if (open) web::openLinkInBrowser(dm::makeRequestURL(""));
 				}
 			);
 			this->m_fields->m_showedGuide = true;

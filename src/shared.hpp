@@ -11,9 +11,6 @@ namespace dm {
 	"Geode-DeathMarkers-" + Mod::get()->getVersion().toVString(true);
 	auto const FORMAT_VERSION = 1;
 
-	// If you fork this mod and change the code, you should change this to the localhost
-	// std::string const API_BASE = "http://localhost:8048/";
-	std::string const API_BASE = "https://deathmarkers.masp005.dev/";
 	auto const HTTP_TIMEOUT = std::chrono::seconds(15);
 
 	struct playerData {
@@ -87,6 +84,8 @@ namespace dm {
 		CCSprite* createNode();
 		void updateNode();
 	};
+
+	std::string makeRequestURL(char const* endpoint);
 
 	vector<DeathLocationMin> getLocalDeaths(int levelId, bool hasPercentage);
 	void storeLocalDeaths(int levelId, vector<DeathLocationMin>& deaths,

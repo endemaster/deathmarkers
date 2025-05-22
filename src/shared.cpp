@@ -113,6 +113,16 @@ void DeathLocation::updateNode() {
 }
 
 
+std::string dm::makeRequestURL(char const* endpoint) {
+	auto mod = Mod::get();
+	auto settValue = mod->getSettingValue<std::string>("server-url");
+	if (!settValue.ends_with("/")) {
+		settValue.append("/");
+		mod->setSettingValue("server-url", settValue);
+	}
+	return settValue + (endpoint[0] == '/' ? endpoint + 1 : endpoint);
+}
+
 std::string uint8_to_hex_string(const uint8_t *v, const size_t s) {
   std::stringstream ss;
 

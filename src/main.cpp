@@ -179,7 +179,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 		);
 
 		// Build the HTTP Request
-		std::string const url = API_BASE + "list";
 		web::WebRequest req = web::WebRequest();
 
 		req.param("levelid", this->m_fields->m_levelProps.levelId);
@@ -189,7 +188,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		req.userAgent(HTTP_AGENT);
 		req.timeout(HTTP_TIMEOUT);
 
-		this->m_fields->m_listener.setFilter(req.get(url));
+		this->m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("list")));
 
 	}
 
@@ -424,7 +423,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 		);
 
 		// Build the HTTP Request
-		std::string const url = API_BASE + "submit";
 		auto myjson = matjson::Value();
 		myjson.set("levelid", matjson::Value(
 			playLayer->m_level->m_levelID.value()
@@ -452,8 +450,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		req.timeout(HTTP_TIMEOUT);
 
-		auto task = req.get(url);
-		m_fields->m_listener.setFilter(task);
+		m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("submit")));
 
 	}
 
