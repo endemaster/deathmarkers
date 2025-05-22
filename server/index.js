@@ -1,6 +1,6 @@
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
   console.log(`
-  -b      Benchmark select features in action
+  No flags.
     `);
   process.exit(0);
 }
@@ -13,19 +13,6 @@ const BINARY_VERSION = 1; // Incremental
 const alphabet = "ABCDEFGHIJOKLMNOPQRSTUVWXYZabcdefghijoklmnopqrstuvwxyz0123456789";
 const random = l => new Array(l).fill(0)
   .map(_ => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-
-const benchmark = (() => {
-  if (!process.argv.includes("-b")) return () => { };
-  console.log("\u001b[1;31mBenchmarking mode activated. Do not use in production.\u001b[0m");
-  let active = "";
-  return name => {
-    if (active) {
-      console.timeEnd(active);
-      active = "";
-    }
-    else console.time(active = (name || "default"));
-  }
-})();
 
 const db = require("./database/" + DATABASE.SCRIPT);
 const expr = require("express");
@@ -122,7 +109,6 @@ function binaryStream(array, columns, map = r => r) {
 
 function renderGuide(fn) {
   console.log(`Rendering guide ${fn}...`);
-  benchmark("guideRender");
   let markdown = fs.readFileSync(`./pages/${fn}`, "utf8");
   markdown = markdown.replace(/<!--.*?-->\n?/gs, ""); // Remove comments
   let chapters = markdown.split("\n")
@@ -154,7 +140,6 @@ function renderGuide(fn) {
   html = html.replace(/src=".*?front\//g, "src=\"");
   // Replace newlines and whitespace between HTML tags
   html = html.replace(/>\s+</g, "><");
-  benchmark();
   return html;
 }
 
@@ -176,15 +161,11 @@ app.get("/list", rateLimit, async (req, res) => {
   let accept = req.query.response || "csv";
   if (accept != "csv" && accept != "bin") return res.sendStatus(400);
 
-  benchmark("query");
   let { deaths, columns } = await db.list(levelId, isPlatformer, inclPractice);
-  benchmark();
 
   res.contentType(accept == "csv" ? "text/csv" : "application/octet-stream");
 
-  benchmark("serve");
   (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
-  benchmark();
 });
 
 app.get("/analysis", rateLimit, async (req, res) => {
@@ -198,13 +179,10 @@ app.get("/analysis", rateLimit, async (req, res) => {
   let columns = "userident,levelversion,practice,x,y,percentage";
   let salt = "_" + random(10);
 
-  benchmark("query");
   let deaths = await db.analyze(levelId, columns);
-  benchmark();
 
   res.contentType(accept == "csv" ? "text/csv" : "application/octet-stream");
 
-  benchmark("serve");
   (accept == "csv" ? csvStream : binaryStream)(deaths, columns,
     d => ([
       crypto.createHash("sha1")
@@ -212,13 +190,11 @@ app.get("/analysis", rateLimit, async (req, res) => {
       ...d.slice(1)
     ])
   ).pipe(res);
-  benchmark();
 });
 
 app.all("/submit", rateLimit, expr.text({
   type: "*/*"
 }), async (req, res) => {
-  benchmark("parseSubmission");
   try {
     req.body = JSON.parse(req.body.toString());
   } catch {
@@ -274,9 +250,7 @@ app.all("/submit", rateLimit, expr.text({
     console.warn(e);
     return res.status(400).send("Unexpected error when parsing request");
   }
-  benchmark();
 
-  benchmark("insert");
   try {
     await db.register(format, req.body);
     res.sendStatus(204);
@@ -285,7 +259,6 @@ app.all("/submit", rateLimit, expr.text({
     return res.status(500).send("Error writing to the database. May be due to wrongly " +
       "formatted input. Try again.");
   }
-  benchmark();
 });
 
 app.get("/robots.txt", (req, res) => {
