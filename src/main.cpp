@@ -404,10 +404,14 @@ class $modify(DMPlayLayer, PlayLayer) {
 				auto res = e->getValue();
 				if (res) {
 					if (!res->ok()) {
-						log::error(
-							"Posting Death failed: {}",
-							res->string().unwrapOr("Body could not be read.")
-						);
+						int code = res->code();
+						auto body = res->string().unwrapOr("Unknown");
+						log::error("Posting Death failed: {} {}", code, body);
+						if (code == 429) {
+							bool queued = !this->m_fields->m_queuedSubmissions.empty();
+							if (queued) this->m_fields->m_queuedSubmissions.clear();
+							this->spamWarning(body.starts_with("IP"), queued);
+						}
 						cb(false);
 					}
 					else {
@@ -452,6 +456,30 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("submit")));
 
+	}
+
+	void spamWarning(bool banned, bool queued) {
+		this->pauseGame(false);
+		std::string content = banned ?
+"<cy>You have been <cr>blocked from submitting deaths</c> for the next hour. For \
+everyone's convenience, submissions from your game have been automatically \
+disabled in the mod settings." :
+			"<cy>Your death was just denied for breaking \
+the rate limit.</c> If you did not do this intentionally, please <cg>wait a few \
+seconds</c> after this warning, to ensure you are not rate limited again. If you \
+do, you will be <cr>banned from submitting deaths for an hour</c> to prevent spam \
+requests to the server. Thanks for understanding.";
+		if (!banned && queued) content += "\n\nThis may have been a result of the mod submitting \
+queued deaths while the server was offline. Normally, this should not get you rate-\
+limited, but for your safety, the death backlog has been forcefully emptied.";
+		content += "\n\nIf you are using a VPN, you may be rate limited because you \
+share an IP with others. I strongly advise you to turn it off.";
+		FLAlertLayer::create(
+			"Spam Warning",
+			content,
+			"Dismiss"
+		)->show();
+		if (banned) Mod::get()->setSettingValue("share-deaths", false);
 	}
 
 	void checkQueue() {
