@@ -446,6 +446,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		deathLoc.addToJSON(&myjson);
 
 		web::WebRequest req = web::WebRequest();
+		req.param("levelid", playLayer->m_level->m_levelID.value());
 		req.bodyJSON(myjson);
 
 		req.userAgent(HTTP_AGENT);

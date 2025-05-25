@@ -103,7 +103,7 @@ This endpoint is intended for a regular playthrough to display Mario Maker-style
 ## GET `/analysis`
 
 Parameter(s):
-- `levelid` (string): The ID of the level requested.
+- `levelid`: The ID of the level requested.
 - Optional: `response`: responds using specified data format, One of: `csv` (default), [`bin`](#binary-transmission)
 
 Delivers (`text/csv`):
@@ -119,9 +119,12 @@ This endpoint is intended for level creators to analyze the deaths in their leve
 
 This parameter in particular is not meant for public access. It should only be used by the mod and is only documented for contributors.
 
+Parameter(s):
+- `levelid`: The ID of the level requested.
+
 Body Data (`application/json`):
 - `format`: (int): Format Version Number, for the following always 1.
-- `levelid` (string): The ID of the level requested.
+- Fallback: `levelid` (string): The ID of the level. (Required only if equivalent parameter is not given)
 - Optional: `levelversion` (int): Version number of the level. 0 by default.
 - Optional: `practice` (bool): Whether the death occurred in practice mode. `false` by default.
 - One of:
@@ -142,7 +145,11 @@ Body Data (`application/json`):
 - Optional: `itemdata` (double): Value of Item ID 0.
 -->
 
-Delivers: `400` or `204` Status. `400` responses supply a human-readable error source.
+Delivers: `4xx` or `204` Status. `4xx` responses supply a human-readable error source.
+
+## Rate Limits
+
+The server limits requests per IP to 2 requests per 8 seconds. (only applies to `/list`, `/analysis` and `/submit`). If one IP breaks this limit for 2 cycles in a row, it is blocked for one hour.
 
 # Binary transmission
 

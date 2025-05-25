@@ -239,6 +239,8 @@ app.all("/submit", checkBan, rateLimitDelegate, expr.text({
 
     if (typeof format != "number") return res.status(400).send("Format not supplied");
 
+    // i dont even care if this causes a 500, the mod sends the id in the body anyway so this will only get triggered by nerds
+    req.body.levelid ||= parseInt(req.query.levelid);
     if (typeof req.body.levelid != "number")
       return res.status(400).send("levelid was not supplied or not numerical");
     // Silently skip ignored levels
@@ -297,7 +299,7 @@ app.all("/submit", checkBan, rateLimitDelegate, expr.text({
 app.get("/robots.txt", (req, res) => {
   res.contentType("text/plain");
   res.send(robots);
-})
+});
 
 app.get("*", (req, res) => {
   guide = req.path.slice(1) || "index";
