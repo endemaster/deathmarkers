@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
 #include <Geode/loader/Event.hpp>
+#include <Geode/ui/MDPopup.hpp>
 #include <vector>
 #include <string>
 #include <stdio.h>
@@ -474,7 +475,7 @@ queued deaths while the server was offline. Normally, this should not get you ra
 limited, but for your safety, the death backlog has been forcefully emptied.";
 		content += "\n\nIf you are using a VPN, you may be rate limited because you \
 share an IP with others. I strongly advise you to turn it off.";
-		FLAlertLayer::create(
+		MDPopup::create(
 			"Spam Warning",
 			content,
 			"Dismiss"
