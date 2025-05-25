@@ -18,6 +18,10 @@ If you wish to use the mod to record your death locations to learn your weak poi
 
 If you don't need the locally stored markers anymore, you can head to this mod's data directory and delete the file corresponding to the ID of the level you want to clean.
 
+## What is this "Spam Warning"?
+
+Since we cannot have nice things on this world, I have to protect my server from spammers. This means casual players may, too, get a notice that they have broken the rate limit. If you are playing, e.g. a demon, and are dying rapidly (in which case the mod is not intended for this anyway), feel free to disable sending deaths, and use local deaths instead, which gets rid of the spam warning popup.
+
 ## Disclaimer
 
 The mod makes use of your *username and user ID* to create an identifier for you. <cg>This identifier **can not be traced back to you**</c>; it is unique to you for the purpose of grouping together attempts (/deaths) that were from the same player. Your identifier is *different* for every level you play, so your deaths *cannot* be grouped together across levels.
