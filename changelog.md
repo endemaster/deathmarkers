@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [1.3.1] - 2025-05-25
+
+### Changed
+
+- Made spam warning scrollable to prevent it from blocking the screen ([#6](https://github.com/MaSp005/deathmarkers/pull/6))
+
 ## [1.3.0] - 2025-05-25
 
 ### Added
