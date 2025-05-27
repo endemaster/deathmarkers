@@ -10,7 +10,6 @@ const {
 } = require("./config.json");
 const BUFFER_SIZE = 500; // # of deaths to push at once
 const BINARY_VERSION = 1; // Incremental
-const RATE_LIMIT_GRACE = 60 * 1000;
 const alphabet = "ABCDEFGHIJOKLMNOPQRSTUVWXYZabcdefghijoklmnopqrstuvwxyz0123456789";
 const random = l => new Array(l).fill(0)
   .map(_ => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
@@ -27,43 +26,11 @@ const { Readable } = require("stream");
 
 app.use(expr.static("front"));
 app.set('trust proxy', 1);
-
-const timedOut = {}
-const banned = {}
-
-// 60 second grace period for clients emptying the queue while the server was offline
-let rateLimit = (_req, _res, next) => next();
-setTimeout(_ => {
-  console.log("Rate Limiter now active.")
-  rateLimit = require("express-rate-limit").rateLimit({
-    windowMs: 8 * 1000, // 8 seconds
-    limit: 2,
-    handler: (request, response, _, options) => {
-      response.statusCode = 429;
-      response.removeHeader("X-RetryAfter");
-      response.end("Too many requests");
-      if (Date.now() - timedOut[request.ip] < 2 * options.windowMs + 1000) {
-        if (Date.now() - timedOut[request.ip] > options.windowMs + 1000) {
-          banned[request.ip] = Date.now() + 60 * 60 * 1000; // 1 hour
-          console.log(request.ip, "banned.");
-        }
-        return;
-      }
-      timedOut[request.ip] = Date.now();
-    }
-  });
-}, RATE_LIMIT_GRACE);
-let rateLimitDelegate = (req, res, next) => rateLimit(req, res, next);
-
-const checkBan = (request, response, next) => {
-  if (!(request.ip in banned)) return next();
-  if (banned[request.ip] < Date.now()) {
-    delete banned[request.ip];
-    return next();
-  }
-  response.statusCode = 429;
-  response.end("IP banned until " + banned[request.ip]);
-}
+const rateLimit = require("express-rate-limit").rateLimit({
+  windowMs: 8 * 1000, // 8 seconds
+  limit: 2,
+  skipFailedRequests: true
+});
 
 const outline = fs.readFileSync("./outline.html", "utf8");
 const guideHtml = {};
@@ -182,7 +149,7 @@ function createUserIdent(userid, username, levelid) {
   return crypto.createHash("sha1").update(source).digest("hex");
 }
 
-app.get("/list", checkBan, rateLimitDelegate, async (req, res) => {
+app.get("/list", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   if (req.query.platformer != "true" && req.query.platformer != "false")
@@ -201,7 +168,7 @@ app.get("/list", checkBan, rateLimitDelegate, async (req, res) => {
   (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
 });
 
-app.get("/analysis", checkBan, rateLimitDelegate, async (req, res) => {
+app.get("/analysis", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   let levelId = parseInt(req.query.levelid);
@@ -225,7 +192,7 @@ app.get("/analysis", checkBan, rateLimitDelegate, async (req, res) => {
   ).pipe(res);
 });
 
-app.all("/submit", checkBan, rateLimitDelegate, expr.text({
+app.all("/submit", rateLimit, expr.text({
   type: "*/*"
 }), async (req, res) => {
   try {
