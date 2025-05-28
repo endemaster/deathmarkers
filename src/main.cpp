@@ -264,6 +264,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		auto sceneRotation = this->m_gameState.m_cameraAngle;
 		float inverseScale = Mod::get()->getSettingValue<float>("marker-scale") /
 			this->m_objectLayer->getScale();
+		if (inverseScale < 0) inverseScale *= -1;
 
 		auto children = this->m_fields->m_dmNode->getChildren();
 		for (int i = 0; i < this->m_fields->m_dmNode->getChildrenCount(); i++) {
