@@ -201,21 +201,19 @@ app.all("/submit", rateLimit, expr.text({
     return res.status(400).send("Wrongly formatted JSON");
   }
   let format;
+  let deaths = [];
   try {
     format = req.body.format;
 
-    if (typeof format != "number") return res.status(400).send("Format not supplied");
+    if (typeof format != "number" || ![1, 2].includes(format)) return res.status(400).send("Format not supplied");
 
-    // i dont even care if this causes a 500, the mod sends the id in the body anyway so this will only get triggered by nerds
-    req.body.levelid ||= parseInt(req.query.levelid);
+    req.body.levelid = /\d+/.test(req.query.levelid) ? parseInt(req.query.levelid) : req.body.levelid;
     if (typeof req.body.levelid != "number")
       return res.status(400).send("levelid was not supplied or not numerical");
     // Silently skip ignored levels
     if (excluded.includes(req.body.levelid)) return res.sendStatus(204);
 
     if (typeof req.body.levelversion != "number") req.body.levelversion = 0;
-
-    req.body.practice = (!!req.body.practice) * 1;
 
     if (typeof req.body.userident != "string") {
       if (!req.body.playername || !req.body.userid)
@@ -229,24 +227,33 @@ app.all("/submit", rateLimit, expr.text({
           "(should be 40 hex characters)");
     }
 
-    if (typeof req.body.percentage != "number")
-      return res.status(400).send("percentage was not supplied or not numerical");
-    req.body.percentage = Math.min(99, Math.max(0, req.body.percentage));
+    if (!Array.isArray(req.body.deaths))
+      deaths = [req.body]
+    else deaths = req.body.deaths;
 
-    if (typeof req.body.x != "number")
-      return res.status(400).send("x was not supplied or not numerical");
-    if (typeof req.body.y != "number")
-      return res.status(400).send("y was not supplied or not numerical");
+    for (i = 0; i < deaths.length; i++) {
+      deaths[i].practice = (!!deaths[i].practice) * 1;
 
-    if (format >= 2) {
-      if (!req.body.coins) {
-        req.body.coins =
-          Number(!!req.body.coin1) |
-          Number(!!req.body.coin2) << 1 |
-          Number(!!req.body.coin3) << 2;
+      if (typeof deaths[i].percentage != "number")
+        return res.status(400).send("percentage was not supplied or not numerical");
+      deaths[i].percentage = Math.min(99, Math.max(0, deaths[i].percentage));
+
+      if (typeof deaths[i].x != "number")
+        return res.status(400).send("x was not supplied or not numerical");
+      if (typeof deaths[i].y != "number")
+        return res.status(400).send("y was not supplied or not numerical");
+
+      if (format >= 2) {
+        if (!deaths[i].coins) {
+          deaths[i].coins =
+            Number(!!deaths[i].coin1) |
+            Number(!!deaths[i].coin2) << 1 |
+            Number(!!deaths[i].coin3) << 2;
+        }
+        if (!deaths[i].itemdata) deaths[i].itemdata = 0;
       }
-      if (!req.body.itemdata) req.body.itemdata = 0;
-    }
+
+    };
 
   } catch (e) {
     console.warn(e);
@@ -254,8 +261,8 @@ app.all("/submit", rateLimit, expr.text({
   }
 
   try {
-    await db.register(format, req.body);
-    res.sendStatus(204);
+    await db.register(req.body, deaths);
+    return res.sendStatus(204);
   } catch (e) {
     console.warn(e);
     return res.status(500).send("Error writing to the database. May be due to wrongly " +

@@ -124,14 +124,16 @@ Parameter(s):
 
 Body Data (`application/json`):
 - `format`: (int): Format Version Number, for the following always 1.
-- Fallback: `levelid` (string): The ID of the level. (Required only if equivalent parameter is not given)
+- Fallback: `levelid` (int): The ID of the level. (Required only if equivalent parameter is not given)
 - Optional: `levelversion` (int): Version number of the level. 0 by default.
-- Optional: `practice` (bool): Whether the death occurred in practice mode. `false` by default.
 - One of:
   1. `userident` (string): See [§ userident](#userident)
   2. - `playername` (string): Player Name
      - `userid` (int): Player's User ID
      The hash will be calculated by the server.
+
+The following can either be part of the root object or individual objects in an array `deaths`:
+- Optional: `practice` (bool): Whether the death occurred in practice mode. `false` by default.
 - `x` (float): x-position
 - `y` (float): y-position
 - `percentage` (int): For normal levels, the percentage of the player 0-100. For platformer levels, the time of death in seconds.
