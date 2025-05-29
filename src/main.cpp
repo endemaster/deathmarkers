@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "shared.hpp"
+#include "submitter.hpp"
 
 using namespace geode::prelude;
 using namespace dm;
@@ -47,8 +48,6 @@ static bool shouldDraw(struct playingLevel level) {
 	return true;
 };
 
-EventListener<web::WebTask> listener;
-
 // MODIFY UI
 
 #include <Geode/modify/PlayLayer.hpp>
@@ -56,6 +55,8 @@ EventListener<web::WebTask> listener;
 class $modify(DMPlayLayer, PlayLayer) {
 
 	struct Fields {
+		EventListener<web::WebTask> m_listener;
+
 		CCNode* m_dmNode = CCNode::create();
 		CCDrawNode* m_chartNode = nullptr;
 
@@ -151,7 +152,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		}
 
 		// Parse result JSON and add all as DeathLocationMin instances to playingLevel.deaths
-		listener.bind(
+		this->m_fields->m_listener.bind(
 			[this, cb](web::WebTask::Event* const e) {
 				auto res = e->getValue();
 				if (res) {
@@ -189,7 +190,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		req.userAgent(HTTP_AGENT);
 		req.timeout(HTTP_TIMEOUT);
 
-		listener.setFilter(req.get(dm::makeRequestURL("list")));
+		this->m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("list")));
 
 	}
 
@@ -403,30 +404,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 		req.header("Content-Type", "application/json");
 		req.header("Accept", "application/json");
 
-		req.timeout(HTTP_TIMEOUT);
-
-		listener.bind(
-			[](web::WebTask::Event* e) {
-				auto res = e->getValue();
-				if (res) {
-					if (!res->ok()) {
-						int code = res->code();
-						auto body = res->string().unwrapOr("Unknown");
-						log::error("Posting Deaths failed: {} {}", code, body);
-					}
-					else {
-						log::debug("Posted Deaths.");
-					}
-				}
-				else if (e->isCancelled()) {
-					log::error("Posting Death was cancelled");
-				}
-			}
-		);
-
 		log::debug("Posting {} Deaths...", this->m_fields->m_submissions.size());
-		listener.setFilter(req.get(dm::makeRequestURL("submit")));
-
+		(new Submitter(req))->submit();
 
 	}
 
