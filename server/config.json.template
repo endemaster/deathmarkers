@@ -1,5 +1,5 @@
 {
-  "PORT": 8048, // Default value, embedded in mod source
+  "PORT": 8048,
   "DATABASE": {
     "SCRIPT": "dummy", // Filename of .js in database/ directory, follow dummy.js for form
     "POSTGRES": { // postgres.js-specific data
@@ -8,5 +8,9 @@
       "password": ""
     }
     // New database scripts can require other attributes in here.
+  },
+  "RATELIMIT": {
+    "window": 10000,
+    "limit": 3
   }
 }

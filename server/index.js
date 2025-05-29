@@ -6,7 +6,7 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 }
 
 const {
-  PORT, DATABASE
+  PORT, DATABASE, RATELIMIT
 } = require("./config.json");
 const BUFFER_SIZE = 500; // # of deaths to push at once
 const BINARY_VERSION = 1; // Incremental
@@ -27,8 +27,8 @@ const { Readable } = require("stream");
 app.use(expr.static("front"));
 app.set('trust proxy', 1);
 const rateLimit = require("express-rate-limit").rateLimit({
-  windowMs: 8 * 1000, // 8 seconds
-  limit: 2,
+  windowMs: RATELIMIT.window,
+  limit: RATELIMIT.limit,
   skipFailedRequests: true
 });
 
