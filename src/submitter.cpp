@@ -12,6 +12,8 @@ Submitter::Submitter(web::WebRequest request) {
 	);
 }
 
+Submitter::~Submitter() {}
+
 void Submitter::event(web::WebTask::Event* e) {
 	auto res = e->getValue();
 	if (res) {
