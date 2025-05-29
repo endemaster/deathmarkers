@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 #include "shared.hpp"
 
 using namespace geode::prelude;
@@ -46,6 +47,8 @@ static bool shouldDraw(struct playingLevel level) {
 	return true;
 };
 
+EventListener<web::WebTask> listener;
+
 // MODIFY UI
 
 #include <Geode/modify/PlayLayer.hpp>
@@ -53,13 +56,11 @@ static bool shouldDraw(struct playingLevel level) {
 class $modify(DMPlayLayer, PlayLayer) {
 
 	struct Fields {
-		EventListener<web::WebTask> m_listener;
-
 		CCNode* m_dmNode = CCNode::create();
 		CCDrawNode* m_chartNode = nullptr;
 
 		vector<DeathLocationMin> m_deaths;
-		deque<DeathLocationOut> m_queuedSubmissions;
+		vector<DeathLocationOut> m_submissions;
 
 		bool m_chartAttached = false;
 		bool m_fetched = false;
@@ -101,6 +102,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		}
 
 		this->m_fields->m_deaths.clear();
+		this->m_fields->m_submissions.clear();
 
 		this->fetch(
 			[this](bool success) {
@@ -112,8 +114,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 					);
 					this->renderHistogram();
 				}
-
-				this->checkQueue();
 			}
 		);
 
@@ -151,7 +151,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		}
 
 		// Parse result JSON and add all as DeathLocationMin instances to playingLevel.deaths
-		m_fields->m_listener.bind(
+		listener.bind(
 			[this, cb](web::WebTask::Event* const e) {
 				auto res = e->getValue();
 				if (res) {
@@ -189,7 +189,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		req.userAgent(HTTP_AGENT);
 		req.timeout(HTTP_TIMEOUT);
 
-		this->m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("list")));
+		listener.setFilter(req.get(dm::makeRequestURL("list")));
 
 	}
 
@@ -210,7 +210,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		auto deathLoc = DeathLocationOut(this->getPosition());
 		deathLoc.percentage = 101;
-		trySubmitDeath(deathLoc);
+		this->m_fields->m_submissions.push_back(deathLoc);
 
 	}
 
@@ -232,6 +232,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 	void onQuit() {
 
 		PlayLayer::onQuit();
+		this->submitDeaths();
 
 		if (!Mod::get()->getSettingValue<bool>("store-local")) return;
 
@@ -364,90 +365,37 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void trySubmitDeath(DeathLocationOut const& deathLoc) {
-
-		if (!shouldSubmit(
-			this->m_fields->m_levelProps,
-			this->m_fields->m_playerProps
-		)) {
-			if (!this->m_fields->m_fetched) {
-				this->fetch([](bool _){});
-			}
-			return;
-		}
-
-		if (this->m_fields->m_queuedSubmissions.empty() &&
-			this->m_fields->m_fetched) {
-			this->submitDeath(deathLoc,
-				[this, deathLoc](bool success) {
-					if (!success) {
-						this->m_fields->m_queuedSubmissions.push_front(deathLoc);
-					}
-				}
-			);
-		}
-		else {
-			this->m_fields->m_queuedSubmissions.push_back(deathLoc);
-			this->checkQueue();
-		}
-
-	}
-
-	void submitDeath(DeathLocationOut const& deathLoc,
-		std::function<void(bool)> cb) {
+	void submitDeaths() {
 
 		auto mod = Mod::get();
-		auto playLayer = static_cast<DMPlayLayer*>(
-			GameManager::get()->getPlayLayer()
-		);
-
-		m_fields->m_listener.bind(
-			[this, deathLoc, cb](web::WebTask::Event* e) {
-				auto res = e->getValue();
-				if (res) {
-					if (!res->ok()) {
-						int code = res->code();
-						auto body = res->string().unwrapOr("Unknown");
-						log::error("Posting Death failed: {} {}", code, body);
-						if (code == 429) {
-							bool queued = !this->m_fields->m_queuedSubmissions.empty();
-							if (queued) this->m_fields->m_queuedSubmissions.clear();
-							this->spamWarning(body.starts_with("IP"), queued);
-						}
-						cb(false);
-					}
-					else {
-						log::debug("Posted Death.");
-						cb(true);
-					}
-				}
-				else if (e->isCancelled()) {
-					log::error("Posting Death was cancelled");
-					cb(false);
-				}
-			}
-		);
 
 		// Build the HTTP Request
 		auto myjson = matjson::Value();
 		myjson.set("levelid", matjson::Value(
-			playLayer->m_level->m_levelID.value()
+			this->m_level->m_levelID.value()
 		));
 		myjson.set("levelversion", matjson::Value(
-			playLayer->m_level->m_levelVersion
+			this->m_level->m_levelVersion
 		));
 		myjson.set("practice", matjson::Value(
-			playLayer->m_isPracticeMode
+			this->m_isPracticeMode
 		));
 		myjson.set("playername", matjson::Value(
 			this->m_fields->m_playerProps.username
 		));
 		myjson.set("userid", matjson::Value(this->m_fields->m_playerProps.userid));
 		myjson.set("format", matjson::Value(FORMAT_VERSION));
-		deathLoc.addToJSON(&myjson);
+
+		auto deathList = matjson::Value(vector<matjson::Value>());
+		for (int i = 0; i < this->m_fields->m_submissions.size(); i++) {
+			auto obj = matjson::Value();
+			this->m_fields->m_submissions[i].addToJSON(&obj);
+			deathList.push(obj);
+		}
+		myjson.set("deaths", deathList);
 
 		web::WebRequest req = web::WebRequest();
-		req.param("levelid", playLayer->m_level->m_levelID.value());
+		req.param("levelid", this->m_level->m_levelID.value());
 		req.bodyJSON(myjson);
 
 		req.userAgent(HTTP_AGENT);
@@ -457,67 +405,29 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		req.timeout(HTTP_TIMEOUT);
 
-		m_fields->m_listener.setFilter(req.get(dm::makeRequestURL("submit")));
-
-	}
-
-	void spamWarning(bool banned, bool queued) {
-		this->pauseGame(false);
-		std::string content = banned ?
-"<cy>You have been <cr>blocked from submitting deaths</c> for the next hour. For \
-everyone's convenience, submissions from your game have been automatically \
-disabled in the mod settings." :
-			"<cy>Your death was just denied for breaking \
-the rate limit.</c> If you did not do this intentionally, please <cg>wait a few \
-seconds</c> after this warning, to ensure you are not rate limited again. If you \
-do, you will be <cr>banned from submitting deaths for an hour</c> to prevent spam \
-requests to the server. Thanks for understanding.";
-		if (!banned && queued) content += "\n\nThis may have been a result of the mod submitting \
-queued deaths while the server was offline. Normally, this should not get you rate-\
-limited, but for your safety, the death backlog has been forcefully emptied.";
-		content += "\n\nIf you are using a VPN, you may be rate limited because you \
-share an IP with others. I strongly advise you to turn it off.";
-		MDPopup::create(
-			"Spam Warning",
-			content,
-			"Dismiss"
-		)->show();
-		if (banned) Mod::get()->setSettingValue("share-deaths", false);
-	}
-
-	void checkQueue() {
-
-		if (this->m_fields->m_queuedSubmissions.empty()) return;
-
-		if (this->m_fields->m_fetched) {
-			log::debug(
-				"Clearing Queue. {} deaths pending.",
-				this->m_fields->m_queuedSubmissions.size()
-			);
-
-			DeathLocationOut next = this->m_fields->m_queuedSubmissions.front();
-			this->m_fields->m_queuedSubmissions.pop_front();
-
-			this->submitDeath(next,
-				[this, next](bool success) {
-					if (success) {
-						this->checkQueue();
-					} else {
-						this->m_fields->m_queuedSubmissions.push_front(next);
+		listener.bind(
+			[](web::WebTask::Event* e) {
+				auto res = e->getValue();
+				if (res) {
+					if (!res->ok()) {
+						int code = res->code();
+						auto body = res->string().unwrapOr("Unknown");
+						log::error("Posting Deaths failed: {} {}", code, body);
+					}
+					else {
+						log::debug("Posted Deaths.");
 					}
 				}
-			);
-		} else {
-			log::debug("Attempting to fetch...");
-
-			this->fetch(
-				[this](bool success) {
-					if (success) {
-						this->checkQueue();
-					}
+				else if (e->isCancelled()) {
+					log::error("Posting Death was cancelled");
 				}
-			);
-		}
+			}
+		);
+
+		log::debug("Posting {} Deaths...", this->m_fields->m_submissions.size());
+		listener.setFilter(req.get(dm::makeRequestURL("submit")));
+
+
 	}
 
 };
@@ -553,7 +463,7 @@ class $modify(DMPlayerObject, PlayerObject) {
 		// deathLoc.coin3 = ...;
 		// deathLoc.itemdata = ...; // where the hell are the counters
 
-		playLayer->trySubmitDeath(deathLoc);
+		playLayer->m_fields->m_submissions.push_back(deathLoc);
 
 		bool newBest = playLayer->m_fields->m_levelProps.platformer || (
 			playLayer->getCurrentPercentInt() >= playLayer->m_level->m_normalPercent.value() ||
