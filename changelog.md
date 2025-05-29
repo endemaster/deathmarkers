@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [Unreleased]
+
+### Changed
+
+- Batch submissions
+
+### Fixed
+
+- Markers turning upside-down in mirror portals
+
 ## [1.3.1] - 2025-05-25
 
 ### Changed
