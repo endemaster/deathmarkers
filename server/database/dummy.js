@@ -2,7 +2,10 @@ module.exports = {
 
   list: async (levelId, isPlatformer, inclPractice) => {
 
-    return Promise.resolve([])
+    return Promise.resolve({
+      deaths: [],
+      columns: isPlatformer ? "x,y" : "x,y,percentage"
+    });
 
   },
 
