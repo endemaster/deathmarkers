@@ -1,0 +1,10 @@
+	/*this->m_fields->m_panel->drawPieGraph({
+		{1, {.5f, .3f, .7f, 1.f}, "test"},
+		{2, {.1f, .4f, .3f, 1.f}, "test"},
+		{3, {.5f, .4f, .2f, 1.f}, "test"}
+	});*/
+	this->m_fields->m_panel->drawBarGraph({
+		{1, {.5f, .3f, .7f, 1.f}, "test"},
+		{2, {.1f, .4f, .3f, 1.f}, "test"},
+		{3, {.5f, .4f, .2f, 1.f}, "test"}
+	});
