@@ -6,6 +6,8 @@
 #include <thread>
 #include "shared.hpp"
 
+#define translate( X ) static_cast<int>(X / 30)
+
 int const MAX_RETRIES = 4;
 auto const RETRY_TIMEOUT = std::chrono::seconds(5);
 

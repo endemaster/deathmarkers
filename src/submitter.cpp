@@ -59,39 +59,43 @@ void Submitter::submit() {
 
 
 void dm::purgeSpam(vector<DeathLocationOut>& deaths) {
-	erase_if(deaths, [](DeathLocationOut& d){
-		return d.percentage > 100;
-	});
+	int total = deaths.size();
 
-	uint32_t total = deaths.size();
+	if (total < 10) return;
+	log::debug("Spam Removal: 10 death threshold passed.");
+
+	std::time_t timeDiff = deaths.back().realTime - deaths.front().realTime;
+	log::debug("Spam Removal: {} deaths over {} seconds.", total, timeDiff);
+	// Limit to 1 death per 1.5 seconds
+	if (timeDiff * 2 < static_cast<long long>(total) * 3) {
+		deaths.clear();
+		return;
+	}
+	log::debug("Spam Removal: Time check passed.");
 
 	if (total < 20) return;
 	log::debug("Spam Removal: 20 death threshold passed.");
 
-	int percFrequency[101] = {0};
+	unordered_map<int, uint32_t> xFrequency;
 	for (auto i = deaths.begin(); i < deaths.end(); i++) {
-		percFrequency[i->percentage]++;
+		int translatedX = translate ( i->pos.x );
+		if (xFrequency.contains(translatedX)) xFrequency[translatedX] = 0;
+		xFrequency[translatedX]++;
 	}
 
 	uint32_t max = 0;
-	for (int p = 0; p < 101; p++) {
-		if (percFrequency[p] > max) max = percFrequency[p];
+	for (auto& [x, count] : xFrequency) {
+		if (count > max) max = count;
 	}
 	log::debug("Spam Removal: Maximum concentration {}", max);
 
-	// In the minimum case (20 deaths total), 5+ deaths at the same % trigger spam removal
-	// In a session of 100 deaths, 25+ at the same % -> spam removal
-	if (max * 4 < total) return;
-	log::debug("Spam Removal: 25% Threshold passed.");
-
-	float percRelFrequency[101] = {0.0f};
-	for (int p = 0; p < 101; p++) {
-		percRelFrequency[p] = static_cast<float>(percFrequency[p]) / max;
-	}
+	if (max * max / 2 < total) return;
+	log::debug("Spam Removal: Square Threshold passed.");
 
 	log::debug("Spam Removal: Pre-purge {}", total);
-	erase_if(deaths, [percRelFrequency](auto& d){
-		return percRelFrequency[d.percentage] > .8;
+	erase_if(deaths, [&xFrequency, max](auto& d){
+		int translatedX = translate ( d.pos.x );
+		return static_cast<float>(xFrequency[translatedX]) / max > .8;
 	});
 	log::debug("Spam Removal: Post-purge {}", deaths.size());
 }
