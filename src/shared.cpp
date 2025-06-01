@@ -73,10 +73,14 @@ bool DeathLocationMin::operator<(const DeathLocationMin& other) const {
 
 
 DeathLocationOut::DeathLocationOut(float x, float y) :
-	DeathLocationMin::DeathLocationMin(x, y) {}
+	DeathLocationMin::DeathLocationMin(x, y) {
+	this->realTime = std::time(nullptr);
+}
 
 DeathLocationOut::DeathLocationOut(CCPoint pos) :
-	DeathLocationMin::DeathLocationMin(pos) {}
+	DeathLocationMin::DeathLocationMin(pos) {
+	this->realTime = std::time(nullptr);
+}
 
 void DeathLocationOut::addToJSON(matjson::Value* json) const {
 	json->set("x", matjson::Value(this->pos.x));
