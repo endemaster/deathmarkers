@@ -370,7 +370,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		req.header("Accept", "application/json");
 
 		log::debug("Posting {} Deaths...", this->m_fields->m_submissions.size());
-		(new Submitter(req))->submit();
+		auto submitter = new Submitter(req);
+		submitter->submit();
+		// deletes itself when done
 
 	}
 

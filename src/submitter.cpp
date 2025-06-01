@@ -29,8 +29,10 @@ void Submitter::event(web::WebTask::Event* e) {
 
 			if (code >= 500 && code < 600 || code < 0) { // whatever 6xx responses mean
 				log::debug("Waiting to retry...");
-				std::this_thread::sleep_for(RETRY_TIMEOUT);
-				this->submit();
+				std::thread([this]() {
+					std::this_thread::sleep_for(RETRY_TIMEOUT);
+					this->submit();
+				}).detach();
 				return;
 			}
 		} else log::debug("Posted Deaths.");
