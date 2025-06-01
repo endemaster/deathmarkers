@@ -48,6 +48,8 @@ module.exports = {
 
   register: async (metadata, deaths) => {
 
+    if (deaths.length == 0) return;
+
     let values = deaths.map(obj => (
       [
         metadata.userident,

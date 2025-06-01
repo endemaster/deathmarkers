@@ -2,16 +2,16 @@ module.exports = {
 
   list: async (levelId, isPlatformer, inclPractice) => {
 
-    return Promise.resolve({
+    return {
       deaths: [],
       columns: isPlatformer ? "x,y" : "x,y,percentage"
-    });
+    };
 
   },
 
   analyze: async (levelId, columns) => {
 
-    return Promise.resolve([])
+    return []
 
   },
 
