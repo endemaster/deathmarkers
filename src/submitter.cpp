@@ -56,3 +56,42 @@ void Submitter::submit() {
 	retries++;
 	this->listener.setFilter(this->request.get(dm::makeRequestURL("submit")));
 }
+
+
+void dm::purgeSpam(vector<DeathLocationOut>& deaths) {
+	erase_if(deaths, [](DeathLocationOut& d){
+		return d.percentage > 100;
+	});
+
+	uint32_t total = deaths.size();
+
+	if (total < 20) return;
+	log::debug("Spam Removal: 20 death threshold passed.");
+
+	int percFrequency[101] = {0};
+	for (auto i = deaths.begin(); i < deaths.end(); i++) {
+		percFrequency[i->percentage]++;
+	}
+
+	uint32_t max = 0;
+	for (int p = 0; p < 101; p++) {
+		if (percFrequency[p] > max) max = percFrequency[p];
+	}
+	log::debug("Spam Removal: Maximum concentration {}", max);
+
+	// In the minimum case (20 deaths total), 5+ deaths at the same % trigger spam removal
+	// In a session of 100 deaths, 25+ at the same % -> spam removal
+	if (max * 4 < total) return;
+	log::debug("Spam Removal: 25% Threshold passed.");
+
+	float percRelFrequency[101] = {0.0f};
+	for (int p = 0; p < 101; p++) {
+		percRelFrequency[p] = static_cast<float>(percFrequency[p]) / max;
+	}
+
+	log::debug("Spam Removal: Pre-purge {}", total);
+	erase_if(deaths, [percRelFrequency](auto& d){
+		return percRelFrequency[d.percentage] > .8;
+	});
+	log::debug("Spam Removal: Post-purge {}", deaths.size());
+}

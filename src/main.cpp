@@ -333,6 +333,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		if (!dm::shouldSubmit(this->m_fields->m_levelProps,
 			this->m_fields->m_playerProps)) return;
 
+		purgeSpam(this->m_fields->m_submissions);
+		if (this->m_fields->m_submissions.size() == 0) return;
+
 		auto mod = Mod::get();
 
 		// Build the HTTP Request

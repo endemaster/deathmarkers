@@ -22,3 +22,7 @@ public:
 	~Submitter();
   void submit();
 };
+
+namespace dm {
+  void purgeSpam(vector<DeathLocationOut>& deaths);
+}
