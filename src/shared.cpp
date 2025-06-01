@@ -113,6 +113,39 @@ void DeathLocation::updateNode() {
 }
 
 
+bool dm::shouldSubmit(struct playingLevel& level, struct playerData& player) {
+	// Ignore Testmode and local Levels
+	if (level.testmode) return false;
+	if (level.levelId == 0) return false;
+
+	// Respect User Setting
+	auto sharingEnabled = Mod::get()->getSettingValue<bool>("share-deaths");
+	if (!sharingEnabled) return false;
+
+	return true;
+};
+
+bool dm::shouldDraw(struct playingLevel& level) {
+	auto playLayer = PlayLayer::get();
+	auto mod = Mod::get();
+
+	if (!playLayer) return false;
+	if (level.levelId == 0) return false; // Don't draw on local levels
+
+	bool isPractice = level.practice || level.testmode;
+	auto drawInPractice = mod->getSettingValue<bool>("draw-in-practice");
+	if (isPractice && !drawInPractice) return false;
+
+	float scale = mod->getSettingValue<float>("marker-scale");
+	if (scale != 0) return true;
+
+	int histHeight = mod->getSettingValue<int>("prog-bar-hist-height");
+	if (histHeight != 0) return true;
+
+	return true;
+};
+
+
 std::string dm::makeRequestURL(char const* endpoint) {
 	auto mod = Mod::get();
 	auto settValue = mod->getSettingValue<std::string>("server-url");
@@ -191,7 +224,7 @@ vector<DeathLocationMin> dm::getLocalDeaths(int levelId, bool hasPercentage) {
 		log::debug("No file found at {}.", filePath);
 		return deaths;
 	}
-	
+
 	auto stream = ifstream(filePath);
 	std::string buffer;
 	char single;
@@ -213,7 +246,7 @@ vector<DeathLocationMin> dm::getLocalDeaths(int levelId, bool hasPercentage) {
 void dm::storeLocalDeaths(int levelId, vector<DeathLocationMin>& deaths,
 	bool hasPercentage) {
 	filesystem::path filePath = Mod::get()->getSaveDir() / numToString(levelId);
-	
+
 	auto stream = ofstream(filePath);
 	for (auto i = deaths.begin(); i < deaths.end(); i++) {
 		stream << i->pos.x << "," << i->pos.y;

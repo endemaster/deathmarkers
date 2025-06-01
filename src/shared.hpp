@@ -85,6 +85,9 @@ namespace dm {
 		void updateNode();
 	};
 
+	bool shouldSubmit(struct playingLevel& level, struct playerData& player);
+	bool shouldDraw(struct playingLevel& level);
+
 	std::string makeRequestURL(char const* endpoint);
 
 	vector<DeathLocationMin> getLocalDeaths(int levelId, bool hasPercentage);

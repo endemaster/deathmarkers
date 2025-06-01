@@ -12,44 +12,6 @@
 using namespace geode::prelude;
 using namespace dm;
 
-// FUNCTIONS
-
-static bool shouldSubmit(struct playingLevel level, struct playerData player) {
-	// Ignore Testmode and local Levels
-	if (level.testmode) return false;
-	if (level.levelId == 0) return false;
-
-	if (player.userid == 0) return false;
-
-	// Respect User Setting
-	auto sharingEnabled = Mod::get()->getSettingValue<bool>("share-deaths");
-	if (!sharingEnabled) return false;
-
-	return true;
-};
-
-static bool shouldDraw(struct playingLevel level) {
-	auto playLayer = PlayLayer::get();
-	auto mod = Mod::get();
-
-	if (!playLayer) return false;
-	if (level.levelId == 0) return false; // Don't draw on local levels
-
-	bool isPractice = level.practice || level.testmode;
-	auto drawInPractice = mod->getSettingValue<bool>("draw-in-practice");
-	if (isPractice && !drawInPractice) return false;
-
-	float scale = mod->getSettingValue<float>("marker-scale");
-	if (scale != 0) return true;
-
-	int histHeight = mod->getSettingValue<int>("prog-bar-hist-height");
-	if (histHeight != 0) return true;
-
-	return true;
-};
-
-// MODIFY UI
-
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJGameLevel.hpp>
 class $modify(DMPlayLayer, PlayLayer) {
@@ -97,7 +59,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		this->m_fields->m_levelProps.testmode = this->m_isTestMode;
 
 		// Don't even continue to list if we're not going to show them anyway
-		if (!shouldDraw(this->m_fields->m_levelProps)) {
+		if (!dm::shouldDraw(this->m_fields->m_levelProps)) {
 			this->m_fields->m_fetched = true;
 			return true;
 		}
@@ -361,12 +323,15 @@ class $modify(DMPlayLayer, PlayLayer) {
 			halfWinWidth - winDiagonal);
 		end = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
 			halfWinWidth + winDiagonal);
-		
+
 		renderMarkers(begin, end);
 
 	}
 
 	void submitDeaths() {
+
+		if (!dm::shouldSubmit(this->m_fields->m_levelProps,
+			this->m_fields->m_playerProps)) return;
 
 		auto mod = Mod::get();
 
@@ -448,7 +413,7 @@ class $modify(DMPlayerObject, PlayerObject) {
 			playLayer->getCurrentPercentInt() >= playLayer->m_level->m_normalPercent.value() ||
 			playLayer->m_level->m_normalPercent.value() == 100
 		);
-		auto render = shouldDraw(playLayer->m_fields->m_levelProps) &&
+		auto render = dm::shouldDraw(playLayer->m_fields->m_levelProps) &&
 			(!Mod::get()->getSettingValue<bool>("newbest-only") || newBest);
 
 		// Render Death Markers
