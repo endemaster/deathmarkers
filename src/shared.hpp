@@ -1,6 +1,7 @@
 #pragma once
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
+#include <ctime>
 
 using namespace geode::prelude;
 using namespace std;
@@ -56,6 +57,7 @@ namespace dm {
 		bool coin3 = false;
 		int itemdata = 0;
 		*/
+		std::time_t realTime = 0;
 		DeathLocationOut(float x, float y);
 		DeathLocationOut(CCPoint pos);
 
@@ -84,6 +86,9 @@ namespace dm {
 		CCSprite* createNode();
 		void updateNode();
 	};
+
+	bool shouldSubmit(struct playingLevel& level, struct playerData& player);
+	bool shouldDraw(struct playingLevel& level);
 
 	std::string makeRequestURL(char const* endpoint);
 

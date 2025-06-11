@@ -1,13 +1,16 @@
 {
-  "PORT": 8048, // Default value, embedded in mod source
+  "PORT": 8048,
   "DATABASE": {
-    "SCRIPT": "sqlite", // Filename of .js in database/ directory, follow sqlite.js for form
-    "FILENAME": "./deaths.db", // sqlite.js requires DATABASE.FILENAME
+    "SCRIPT": "dummy", // Filename of .js in database/ directory, follow dummy.js for form
     "POSTGRES": { // postgres.js-specific data
       "database": "",
       "user": "",
       "password": ""
     }
     // New database scripts can require other attributes in here.
+  },
+  "RATELIMIT": {
+    "window": 10000,
+    "limit": 3
   }
 }

@@ -1,5 +1,6 @@
 const DATABASE = require("../config.json").DATABASE.POSTGRES;
 const { Pool } = require("pg");
+const format = require("pg-format");
 
 const db = new Pool(DATABASE);
 
@@ -45,22 +46,28 @@ module.exports = {
 
   },
 
-  register: async (format, data) => {
+  register: async (metadata, deaths) => {
 
-    switch (format) {
-      case 1:
-        await db.query({
-          text: "INSERT INTO format1 VALUES ($1, $2, $3, $4, $5, $6, $7)",
-          values: [data.userident, data.levelid, data.levelversion, data.practice, data.x, data.y, data.percentage]
-        });
-        break;
-      case 2:
-        await db.query({
-          text: "INSERT INTO format2 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
-          values: [data.userident, data.levelid, data.levelversion, data.practice, data.x, data.y, data.percentage, data.coins, data.itemdata]
-        });
-        break;
-    }
+    if (deaths.length == 0) return;
+
+    let values = deaths.map(obj => (
+      [
+        metadata.userident,
+        metadata.levelid,
+        metadata.levelversion,
+        !!obj.practice,
+        obj.x,
+        obj.y,
+        obj.percentage
+      ].concat(metadata.format == 2 ? [
+        obj.coins,
+        obj.itemdata
+      ] : [])
+    ));
+
+    // format is checked by caller, can be safely included here
+    let query = format(`INSERT INTO format${metadata.format} VALUES %L`, values);
+    await db.query(query);
 
   }
 

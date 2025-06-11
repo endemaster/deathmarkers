@@ -6,11 +6,10 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 }
 
 const {
-  PORT, DATABASE
+  PORT, DATABASE, RATELIMIT
 } = require("./config.json");
 const BUFFER_SIZE = 500; // # of deaths to push at once
 const BINARY_VERSION = 1; // Incremental
-const RATE_LIMIT_GRACE = 60 * 1000;
 const alphabet = "ABCDEFGHIJOKLMNOPQRSTUVWXYZabcdefghijoklmnopqrstuvwxyz0123456789";
 const random = l => new Array(l).fill(0)
   .map(_ => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
@@ -27,43 +26,11 @@ const { Readable } = require("stream");
 
 app.use(expr.static("front"));
 app.set('trust proxy', 1);
-
-const timedOut = {}
-const banned = {}
-
-// 60 second grace period for clients emptying the queue while the server was offline
-let rateLimit = (_req, _res, next) => next();
-setTimeout(_ => {
-  console.log("Rate Limiter now active.")
-  rateLimit = require("express-rate-limit").rateLimit({
-    windowMs: 8 * 1000, // 8 seconds
-    limit: 2,
-    handler: (request, response, _, options) => {
-      response.statusCode = 429;
-      response.removeHeader("X-RetryAfter");
-      response.end("Too many requests");
-      if (Date.now() - timedOut[request.ip] < 2 * options.windowMs + 1000) {
-        if (Date.now() - timedOut[request.ip] > options.windowMs + 1000) {
-          banned[request.ip] = Date.now() + 60 * 60 * 1000; // 1 hour
-          console.log(request.ip, "banned.");
-        }
-        return;
-      }
-      timedOut[request.ip] = Date.now();
-    }
-  });
-}, RATE_LIMIT_GRACE);
-let rateLimitDelegate = (req, res, next) => rateLimit(req, res, next);
-
-const checkBan = (request, response, next) => {
-  if (!(request.ip in banned)) return next();
-  if (banned[request.ip] < Date.now()) {
-    delete banned[request.ip];
-    return next();
-  }
-  response.statusCode = 429;
-  response.end("IP banned until " + banned[request.ip]);
-}
+const rateLimit = require("express-rate-limit").rateLimit({
+  windowMs: RATELIMIT.window,
+  limit: RATELIMIT.limit,
+  skipFailedRequests: true
+});
 
 const outline = fs.readFileSync("./outline.html", "utf8");
 const guideHtml = {};
@@ -182,7 +149,7 @@ function createUserIdent(userid, username, levelid) {
   return crypto.createHash("sha1").update(source).digest("hex");
 }
 
-app.get("/list", checkBan, rateLimitDelegate, async (req, res) => {
+app.get("/list", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   if (req.query.platformer != "true" && req.query.platformer != "false")
@@ -201,7 +168,7 @@ app.get("/list", checkBan, rateLimitDelegate, async (req, res) => {
   (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
 });
 
-app.get("/analysis", checkBan, rateLimitDelegate, async (req, res) => {
+app.get("/analysis", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
   let levelId = parseInt(req.query.levelid);
@@ -225,7 +192,7 @@ app.get("/analysis", checkBan, rateLimitDelegate, async (req, res) => {
   ).pipe(res);
 });
 
-app.all("/submit", checkBan, rateLimitDelegate, expr.text({
+app.all("/submit", rateLimit, expr.text({
   type: "*/*"
 }), async (req, res) => {
   try {
@@ -234,21 +201,19 @@ app.all("/submit", checkBan, rateLimitDelegate, expr.text({
     return res.status(400).send("Wrongly formatted JSON");
   }
   let format;
+  let deaths = [];
   try {
     format = req.body.format;
 
-    if (typeof format != "number") return res.status(400).send("Format not supplied");
+    if (typeof format != "number" || ![1, 2].includes(format)) return res.status(400).send("Format not supplied");
 
-    // i dont even care if this causes a 500, the mod sends the id in the body anyway so this will only get triggered by nerds
-    req.body.levelid ||= parseInt(req.query.levelid);
+    req.body.levelid = /\d+/.test(req.query.levelid) ? parseInt(req.query.levelid) : req.body.levelid;
     if (typeof req.body.levelid != "number")
       return res.status(400).send("levelid was not supplied or not numerical");
     // Silently skip ignored levels
     if (excluded.includes(req.body.levelid)) return res.sendStatus(204);
 
     if (typeof req.body.levelversion != "number") req.body.levelversion = 0;
-
-    req.body.practice = (!!req.body.practice) * 1;
 
     if (typeof req.body.userident != "string") {
       if (!req.body.playername || !req.body.userid)
@@ -262,24 +227,33 @@ app.all("/submit", checkBan, rateLimitDelegate, expr.text({
           "(should be 40 hex characters)");
     }
 
-    if (typeof req.body.percentage != "number")
-      return res.status(400).send("percentage was not supplied or not numerical");
-    req.body.percentage = Math.min(99, Math.max(0, req.body.percentage));
+    if (!Array.isArray(req.body.deaths))
+      deaths = [req.body]
+    else deaths = req.body.deaths;
 
-    if (typeof req.body.x != "number")
-      return res.status(400).send("x was not supplied or not numerical");
-    if (typeof req.body.y != "number")
-      return res.status(400).send("y was not supplied or not numerical");
+    for (i = 0; i < deaths.length; i++) {
+      deaths[i].practice = (!!deaths[i].practice) * 1;
 
-    if (format >= 2) {
-      if (!req.body.coins) {
-        req.body.coins =
-          Number(!!req.body.coin1) |
-          Number(!!req.body.coin2) << 1 |
-          Number(!!req.body.coin3) << 2;
+      if (typeof deaths[i].percentage != "number")
+        return res.status(400).send("percentage was not supplied or not numerical");
+      deaths[i].percentage = Math.min(99, Math.max(0, deaths[i].percentage));
+
+      if (typeof deaths[i].x != "number")
+        return res.status(400).send("x was not supplied or not numerical");
+      if (typeof deaths[i].y != "number")
+        return res.status(400).send("y was not supplied or not numerical");
+
+      if (format >= 2) {
+        if (!deaths[i].coins) {
+          deaths[i].coins =
+            Number(!!deaths[i].coin1) |
+            Number(!!deaths[i].coin2) << 1 |
+            Number(!!deaths[i].coin3) << 2;
+        }
+        if (!deaths[i].itemdata) deaths[i].itemdata = 0;
       }
-      if (!req.body.itemdata) req.body.itemdata = 0;
-    }
+
+    };
 
   } catch (e) {
     console.warn(e);
@@ -287,8 +261,8 @@ app.all("/submit", checkBan, rateLimitDelegate, expr.text({
   }
 
   try {
-    await db.register(format, req.body);
-    res.sendStatus(204);
+    await db.register(req.body, deaths);
+    return res.sendStatus(204);
   } catch (e) {
     console.warn(e);
     return res.status(500).send("Error writing to the database. May be due to wrongly " +
