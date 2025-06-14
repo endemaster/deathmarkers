@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="xiYQnjZuGAK0kINvY0NI" name="Death occurring">
-        <mxGraphModel dx="609" dy="623" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="400" math="0" shadow="0">
+        <mxGraphModel dx="1024" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="840" pageHeight="560" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -10,206 +10,119 @@
                 <mxCell id="c52xVLsTPo6s3wwN7su7-1" value="Player dies" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fontStyle=1" parent="1" vertex="1">
                     <mxGeometry x="40" y="70" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="PGn5t33jIPQjncakiUjT-2" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="R9EEyy6xjLPGFwWbAaNl-1" target="PGn5t33jIPQjncakiUjT-1" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="PGn5t33jIPQjncakiUjT-2" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="R9EEyy6xjLPGFwWbAaNl-1" target="QDr2foNgI6X0kTm3iASj-1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="360" y="100" as="targetPoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="R9EEyy6xjLPGFwWbAaNl-1" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Create Death Location Object&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="200" y="70" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="rFBebrCwlaEeFzTYuvqe-2" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="PGn5t33jIPQjncakiUjT-1" target="rFBebrCwlaEeFzTYuvqe-1" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="PGn5t33jIPQjncakiUjT-1" value="Submit Death" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=0" parent="1" vertex="1">
-                    <mxGeometry x="360" y="70" width="120" height="60" as="geometry"/>
+                <mxCell id="rFBebrCwlaEeFzTYuvqe-2" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="QDr2foNgI6X0kTm3iASj-1" target="rFBebrCwlaEeFzTYuvqe-1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="420" y="130" as="sourcePoint"/>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="rFBebrCwlaEeFzTYuvqe-4" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="rFBebrCwlaEeFzTYuvqe-1" target="rFBebrCwlaEeFzTYuvqe-3" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="rFBebrCwlaEeFzTYuvqe-1" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Render Markers&lt;br&gt;(in-level)&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="360" y="170" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="200" y="170" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="rFBebrCwlaEeFzTYuvqe-6" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="rFBebrCwlaEeFzTYuvqe-3" target="rFBebrCwlaEeFzTYuvqe-5" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="rFBebrCwlaEeFzTYuvqe-3" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Add death to list&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="200" y="170" width="120" height="60" as="geometry"/>
+                <mxCell id="rFBebrCwlaEeFzTYuvqe-3" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Add death to total list of deaths&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="170" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="qaDFMie_lyew5DvOXlI8-2" style="edgeStyle=none;html=1;fontSize=12;" parent="1" source="rFBebrCwlaEeFzTYuvqe-5" target="qaDFMie_lyew5DvOXlI8-1" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="rFBebrCwlaEeFzTYuvqe-5" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Render Histogram&lt;br&gt;(progress bar)&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
-                    <mxGeometry x="200" y="270" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="520" y="170" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="qaDFMie_lyew5DvOXlI8-1" value="End" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" parent="1" vertex="1">
-                    <mxGeometry x="520" y="270" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="680" y="170" width="120" height="60" as="geometry"/>
                 </mxCell>
-            </root>
-        </mxGraphModel>
-    </diagram>
-    <diagram id="rmPj36xEzQe9r_7l5fX9" name="Submit Death &amp; Queue">
-        <mxGraphModel dx="688" dy="625" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="600" math="0" shadow="0">
-            <root>
-                <mxCell id="0"/>
-                <mxCell id="1" parent="0"/>
-                <mxCell id="10" style="edgeStyle=none;html=1;" parent="1" source="25" target="6" edge="1">
+                <mxCell id="QDr2foNgI6X0kTm3iASj-1" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Add death to submission queue&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="70" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-1" style="edgeStyle=none;html=1;fontSize=12;" edge="1" source="op2RKxlH_54YGtS_0IFf-2" target="op2RKxlH_54YGtS_0IFf-4" parent="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-2" value="Player exits Level" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="40" y="310" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-3" style="edgeStyle=none;html=1;fontSize=12;" edge="1" source="op2RKxlH_54YGtS_0IFf-4" target="op2RKxlH_54YGtS_0IFf-13" parent="1">
                     <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="165" y="100" as="sourcePoint"/>
+                        <mxPoint x="360" y="340" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="8" style="edgeStyle=none;html=1;" parent="1" source="6" target="7" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-4" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Create Submitter object with submission queue&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="310" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="9" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="8" vertex="1" connectable="0">
-                    <mxGeometry x="-0.3667" y="-2" relative="1" as="geometry">
-                        <mxPoint x="4" y="-2" as="offset"/>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-12" value="End" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="680" y="310" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-15" style="edgeStyle=none;html=1;" edge="1" parent="1" source="op2RKxlH_54YGtS_0IFf-13" target="op2RKxlH_54YGtS_0IFf-12">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="12" value="Yes" style="edgeStyle=none;html=1;" parent="1" source="6" target="11" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-16" value="Success" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="op2RKxlH_54YGtS_0IFf-15">
+                    <mxGeometry x="0.2333" y="-1" relative="1" as="geometry">
+                        <mxPoint x="-23" y="-1" as="offset"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="6" value="Have deaths been fetched yet?" style="rhombus;whiteSpace=wrap;html=1;spacing=7;" parent="1" vertex="1">
-                    <mxGeometry x="205" y="50" width="130" height="100" as="geometry"/>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-17" style="edgeStyle=none;html=1;" edge="1" parent="1" source="op2RKxlH_54YGtS_0IFf-13" target="op2RKxlH_54YGtS_0IFf-14">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="15" style="edgeStyle=none;html=1;" parent="1" source="7" target="11" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="16" value="Success" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="15" vertex="1" connectable="0">
-                    <mxGeometry x="-0.2382" y="3" relative="1" as="geometry">
+                <mxCell id="op2RKxlH_54YGtS_0IFf-19" value="Failure" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="op2RKxlH_54YGtS_0IFf-17">
+                    <mxGeometry x="-0.1134" y="1" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="18" style="edgeStyle=none;html=1;" parent="1" source="7" target="26" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <mxPoint x="570" y="100" as="targetPoint"/>
-                    </mxGeometry>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-13" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Attempt Submitting deaths&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="310" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="19" value="Failure" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="18" vertex="1" connectable="0">
-                    <mxGeometry x="-0.3861" y="-2" relative="1" as="geometry">
-                        <mxPoint x="10" y="-2" as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="7" value="Attempt to fetch again" style="rounded=0;whiteSpace=wrap;html=1;glass=0;shadow=0;" parent="1" vertex="1">
-                    <mxGeometry x="385" y="70" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="23" style="edgeStyle=none;html=1;" parent="1" source="11" target="22" edge="1">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-3" style="edgeStyle=none;html=1;" edge="1" parent="1" source="op2RKxlH_54YGtS_0IFf-14" target="0QSBqpW4siYRYPhVDBWY-2">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="24" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="23" vertex="1" connectable="0">
-                    <mxGeometry x="-0.5167" y="-1" relative="1" as="geometry">
-                        <mxPoint x="1" y="6" as="offset"/>
-                    </mxGeometry>
+                <mxCell id="op2RKxlH_54YGtS_0IFf-14" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Wait 5 seconds in new thread&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="200" y="427.5" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="28" style="edgeStyle=none;html=1;" parent="1" source="11" target="13" edge="1">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-5" style="edgeStyle=none;html=1;" edge="1" parent="1" source="0QSBqpW4siYRYPhVDBWY-1" target="op2RKxlH_54YGtS_0IFf-13">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="29" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="28" vertex="1" connectable="0">
-                    <mxGeometry x="-0.4267" y="-3" relative="1" as="geometry">
-                        <mxPoint x="6" y="-3" as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="11" value="Are there deaths queued for submission?" style="rhombus;whiteSpace=wrap;html=1;spacing=7;" parent="1" vertex="1">
-                    <mxGeometry x="205" y="200" width="130" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="21" style="edgeStyle=none;html=1;" parent="1" source="13" target="20" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="13" value="Push Death to end of queue" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="385" y="220" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="17" value="End" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1" parent="1" vertex="1">
-                    <mxGeometry x="745" y="460" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="31" style="edgeStyle=none;html=1;" parent="1" source="20" target="30" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="32" value="Failure" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="31" vertex="1" connectable="0">
-                    <mxGeometry x="-0.3226" y="1" relative="1" as="geometry">
-                        <mxPoint x="2" y="1" as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="36" value="Success" style="edgeStyle=none;html=1;" parent="1" source="20" target="35" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="20" value="Attempt to submit first death in queue to server" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="570" y="220" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="43" style="edgeStyle=none;html=1;" parent="1" source="22" target="17" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="270" y="490"/>
-                        </Array>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="44" value="Failure" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="43" vertex="1" connectable="0">
-                    <mxGeometry x="-0.9169" y="2" relative="1" as="geometry">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-6" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0QSBqpW4siYRYPhVDBWY-5">
+                    <mxGeometry x="-0.1001" y="-1" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="45" style="edgeStyle=none;html=1;" parent="1" source="22" target="35" edge="1">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-7" style="edgeStyle=none;html=1;" edge="1" parent="1" source="0QSBqpW4siYRYPhVDBWY-1" target="op2RKxlH_54YGtS_0IFf-12">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="49" value="Success" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="45" vertex="1" connectable="0">
-                    <mxGeometry x="-0.5773" y="1" relative="1" as="geometry">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-8" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="0QSBqpW4siYRYPhVDBWY-7">
+                    <mxGeometry x="-0.2782" y="2" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="22" value="Attempt to submit death to server" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="210" y="340" width="120" height="60" as="geometry"/>
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-1" value="Retry count &amp;gt; 4?" style="rhombus;whiteSpace=wrap;html=1;spacing=7;" vertex="1" parent="1">
+                    <mxGeometry x="515" y="407.5" width="130" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="25" value="Submit Death" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fontStyle=1" parent="1" vertex="1">
-                    <mxGeometry x="40" y="70" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="27" style="edgeStyle=none;html=1;" parent="1" source="26" target="17" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="920" y="100"/>
-                            <mxPoint x="920" y="490"/>
-                        </Array>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="26" value="Push Death to end of queue" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="570" y="70" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="34" style="edgeStyle=none;html=1;" parent="1" source="30" target="17" edge="1">
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-4" style="edgeStyle=none;html=1;" edge="1" parent="1" source="0QSBqpW4siYRYPhVDBWY-2" target="0QSBqpW4siYRYPhVDBWY-1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="30" value="Push failed death back to front of queue" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-                    <mxGeometry x="745" y="220" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="42" style="edgeStyle=none;html=1;" parent="1" source="35" target="17" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="46" value="No" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="42" vertex="1" connectable="0">
-                    <mxGeometry x="-0.2308" y="-2" relative="1" as="geometry">
-                        <mxPoint as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="47" style="edgeStyle=none;html=1;" parent="1" source="35" target="20" edge="1">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="760" y="370"/>
-                        </Array>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="48" value="Yes" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="47" vertex="1" connectable="0">
-                    <mxGeometry x="-0.761" relative="1" as="geometry">
-                        <mxPoint x="11" as="offset"/>
-                    </mxGeometry>
-                </mxCell>
-                <mxCell id="35" value="Are there deaths queued for submission?" style="rhombus;whiteSpace=wrap;html=1;spacing=7;" parent="1" vertex="1">
-                    <mxGeometry x="565" y="320" width="130" height="100" as="geometry"/>
-                </mxCell>
-                <mxCell id="N-TcYGsxThB6bkFKDh7X-49" value="The outside systems also add any occurring death to the internal list of deaths.&lt;br style=&quot;font-size: 8px;&quot;&gt;&lt;div style=&quot;font-size: 8px;&quot;&gt;&lt;span style=&quot;background-color: initial; font-size: 8px;&quot;&gt;In order for it to stay correct when server submissions are unstable, the mod always tries to fetch the list before submitting any deaths to ensure none are duplicated for the player.&lt;/span&gt;&lt;/div&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;rounded=1;shadow=0;glass=0;sketch=0;align=left;spacing=10;verticalAlign=bottom;fontSize=8;size=22;" parent="1" vertex="1">
-                    <mxGeometry x="30" y="435" width="170" height="110" as="geometry"/>
-                </mxCell>
-                <mxCell id="N-TcYGsxThB6bkFKDh7X-50" value="Ensures queued deaths stay in same order of occurring and are only ever submitted in that order." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;rounded=1;shadow=0;glass=0;sketch=0;align=left;spacing=10;verticalAlign=bottom;fontSize=8;size=19;" parent="1" vertex="1">
-                    <mxGeometry x="710" y="150" width="100" height="70" as="geometry"/>
+                <mxCell id="0QSBqpW4siYRYPhVDBWY-2" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;Count retry&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;fontSize=8;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="427.5" width="120" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
     </diagram>
     <diagram id="JVXeOtpgBd3yuuJxGNpA" name="Editor View">
-        <mxGraphModel dx="688" dy="625" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="800" math="0" shadow="0">
+        <mxGraphModel dx="870" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="800" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -338,7 +251,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="15YZcj6Ia-t9GjHIpjk4" name="Editor Groups">
-        <mxGraphModel dx="781" dy="625" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="750" math="0" shadow="0">
+        <mxGraphModel dx="870" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="750" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -754,7 +667,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="DKK0FImqj2bWYTi0N5O5" name="Server Database">
-        <mxGraphModel dx="148" dy="625" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="500" math="0" shadow="0">
+        <mxGraphModel dx="870" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="500" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -794,107 +707,107 @@
         </mxGraphModel>
     </diagram>
     <diagram id="elSYL4YhAQR_kdwSKmtg" name="Screen Limit">
-        <mxGraphModel dx="703" dy="519" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="500" math="0" shadow="0">
+        <mxGraphModel dx="870" dy="690" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="500" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-1" value="Camera" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-1" value="Camera" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="40" y="80" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-4" value="Diagonal" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-4" value="Diagonal" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="265" y="48" width="70" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-6" value="" style="group;rotation=-29.4;" vertex="1" connectable="0" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-6" value="" style="group;rotation=-29.4;" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="280" y="84" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-2" value="" style="rounded=0;whiteSpace=wrap;html=1;rotation=-29.4;" vertex="1" parent="V7X91Kk4FJNEyr3V9bVB-6">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-2" value="" style="rounded=0;whiteSpace=wrap;html=1;rotation=-29.4;" parent="V7X91Kk4FJNEyr3V9bVB-6" vertex="1">
                     <mxGeometry width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-3" value="" style="endArrow=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="V7X91Kk4FJNEyr3V9bVB-6" source="V7X91Kk4FJNEyr3V9bVB-2" target="V7X91Kk4FJNEyr3V9bVB-2">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-3" value="" style="endArrow=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=1;exitDx=0;exitDy=0;" parent="V7X91Kk4FJNEyr3V9bVB-6" source="V7X91Kk4FJNEyr3V9bVB-2" target="V7X91Kk4FJNEyr3V9bVB-2" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="88" y="183" as="sourcePoint"/>
                         <mxPoint x="108" y="115" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-8" value="" style="endArrow=none;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-8" value="" style="endArrow=none;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="452" y="240" as="sourcePoint"/>
                         <mxPoint x="452" y="90" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-9" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-9" value="" style="endArrow=classic;startArrow=classic;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="270" y="230" as="sourcePoint"/>
                         <mxPoint x="450" y="230" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-10" value="widest possible x-range" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-10" value="widest possible x-range" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="285" y="228" width="150" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-11" value="" style="endArrow=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;fillColor=#e51400;strokeColor=light-dark(#B20000,#FF0202);" edge="1" parent="1" target="V7X91Kk4FJNEyr3V9bVB-2">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-11" value="" style="endArrow=none;html=1;entryX=0;entryY=0;entryDx=0;entryDy=0;fillColor=#e51400;strokeColor=light-dark(#B20000,#FF0202);" parent="1" target="V7X91Kk4FJNEyr3V9bVB-2" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="257" y="129" as="sourcePoint"/>
                         <mxPoint x="270" y="130" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-7" value="" style="endArrow=none;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-7" value="" style="endArrow=none;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="268" y="240" as="sourcePoint"/>
                         <mxPoint x="268" y="90" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-12" value="70 units&lt;div&gt;leniency&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=8;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-12" value="70 units&lt;div&gt;leniency&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=8;" parent="1" vertex="1">
                     <mxGeometry x="224" y="128" width="50" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-13" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-13" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="520" y="80" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-14" value="" style="endArrow=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="V7X91Kk4FJNEyr3V9bVB-13" target="V7X91Kk4FJNEyr3V9bVB-13">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-14" value="" style="endArrow=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="V7X91Kk4FJNEyr3V9bVB-13" target="V7X91Kk4FJNEyr3V9bVB-13" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="540" y="140" as="sourcePoint"/>
                         <mxPoint x="590" y="90" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-15" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#FFFFFF);" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-15" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#FFFFFF);" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="600" y="125" as="sourcePoint"/>
                         <mxPoint x="508" y="73" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-16" value="" style="endArrow=none;dashed=1;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="V7X91Kk4FJNEyr3V9bVB-13">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-16" value="" style="endArrow=none;dashed=1;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;" parent="1" source="V7X91Kk4FJNEyr3V9bVB-13" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="530" y="220" as="sourcePoint"/>
                         <mxPoint x="600" y="125" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-17" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#1BFF0B);" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-17" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#1BFF0B);" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="600" y="125" as="sourcePoint"/>
                         <mxPoint x="495" y="125" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-19" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#1BFF0B);" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-19" value="" style="endArrow=none;html=1;strokeColor=light-dark(#000000,#1BFF0B);" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="705" y="125" as="sourcePoint"/>
                         <mxPoint x="600" y="125" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-21" value="" style="endArrow=none;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-21" value="" style="endArrow=none;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="705.0000000000001" y="240" as="sourcePoint"/>
                         <mxPoint x="705.0000000000001" y="90" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-22" value="" style="endArrow=classic;startArrow=classic;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-22" value="" style="endArrow=classic;startArrow=classic;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="497.43" y="230" as="sourcePoint"/>
                         <mxPoint x="700" y="230" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-23" value="considered range of death locations" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-23" value="considered range of death locations" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="495.00000000000006" y="228" width="210" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="V7X91Kk4FJNEyr3V9bVB-24" value="" style="endArrow=none;html=1;" edge="1" parent="1">
+                <mxCell id="V7X91Kk4FJNEyr3V9bVB-24" value="" style="endArrow=none;html=1;" parent="1" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="495.43" y="240" as="sourcePoint"/>
                         <mxPoint x="495.43" y="90" as="targetPoint"/>
