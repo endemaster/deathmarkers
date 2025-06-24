@@ -313,8 +313,16 @@ class $modify(DMEditorPauseLayer, EditorPauseLayer) {
 		if (!EditorPauseLayer::init(layer)) return false;
 
 		auto editor = static_cast<DMEditorLayer*>(layer);
-		auto offSprite = CCSprite::create("marker-button-deact.png"_spr);
-		auto onSprite = CCSprite::create("marker-button-on.png"_spr);
+		auto offSprite = CircleButtonSprite::createWithSprite(
+			"death-marker.png"_spr,
+			0.81f, CircleBaseColor::Gray,
+			CircleBaseSize::Small
+		);
+		auto onSprite = CircleButtonSprite::createWithSprite(
+			"death-marker.png"_spr,
+			0.81f, CircleBaseColor::Green,
+			CircleBaseSize::Small
+		);
 		this->m_fields->m_button = CCMenuItemExt::createSprite(
 			offSprite,
 			onSprite,
