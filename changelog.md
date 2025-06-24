@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [Unreleased]
+
+### Changed
+
+- Upgrade to Geode v4.6.1
+
 ## [1.3.2] - 2025-06-11
 
 ### Changed
