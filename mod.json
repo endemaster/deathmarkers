@@ -27,11 +27,12 @@
 			"description": "Contributes to the ecosystem of level creators trying to gain insight on their gameplay. <cg>Your deaths remain anonymous.</c> Visit the GitHub Repository for more information.",
 			"default": true
 		},
-		"store-local": {
-			"type": "bool",
-			"name": "Show only local deaths",
+		"store-local-2": {
+			"type": "string",
+			"name": "Use local deaths",
 			"description": "Store your deaths locally and only load them instead of the online collection. <cr>The mod does not store deaths locally if this is disabled.</c> This does not affect whether your deaths are submitted to the server.",
-			"default": false
+			"one-of": ["Never", "Demons only", "Always"],
+			"default": "Never"
 		},
 		"normal-only": {
 			"type": "bool",

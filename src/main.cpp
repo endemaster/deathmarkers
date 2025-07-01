@@ -449,3 +449,31 @@ class $modify(DMPlayerObject, PlayerObject) {
 	}
 
 };
+
+$on_mod(Loaded) {
+
+	auto mod = Mod::get();
+
+	// Upgrade Settings
+	int settingVersion;
+	try {
+		settingVersion = mod->getSavedValue<int>("setting-version");
+	}
+	catch (exception err) {
+		log::debug("No value saved.");
+		settingVersion = 0;
+	}
+	
+	log::debug("Version {}", settingVersion);
+	if (settingVersion < 0) settingVersion = 0;
+	if (settingVersion == 0) {
+		mod->setSettingValue("store-local-2",
+			mod->getSettingValue<bool>("store-local") ? "Always" : "Never"
+		);
+		settingVersion = 1;
+	}
+	if (settingVersion > 1) settingVersion = 1;
+
+	mod->setSavedValue("setting-version", settingVersion);
+	
+};
