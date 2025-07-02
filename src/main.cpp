@@ -29,6 +29,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 		bool m_fetched = false;
 		struct playerData m_playerProps;
 		struct playingLevel m_levelProps;
+
+		bool m_useLocal;
 	};
 
 	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
@@ -57,6 +59,12 @@ class $modify(DMPlayLayer, PlayLayer) {
 		this->m_fields->m_levelProps.platformer = level->isPlatformer();
 		this->m_fields->m_levelProps.practice = this->m_isPracticeMode;
 		this->m_fields->m_levelProps.testmode = this->m_isTestMode;
+
+		std::string storeLocalStr = Mod::get()->getSettingValue<gd::string>("store-local-2");
+		this->m_fields->m_useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
+			this->m_level->m_stars >= 10;
+
+		log::debug("{} {} {}", storeLocalStr, this->m_level->m_stars, this->m_fields->m_useLocal);
 
 		// Don't even continue to list if we're not going to show them anyway
 		if (!dm::shouldDraw(this->m_fields->m_levelProps)) {
@@ -100,7 +108,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		log::info("Listing Deaths...");
 
-		if (Mod::get()->getSettingValue<bool>("store-local")) {
+		if (this->m_fields->m_useLocal) {
 			// Normally, when fetching we append, but this will not fail
 			// so we can safely clear and overwrite here.
 			this->m_fields->m_deaths.clear();
@@ -197,7 +205,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		PlayLayer::onQuit();
 		this->submitDeaths();
 
-		if (!Mod::get()->getSettingValue<bool>("store-local")) return;
+		if (!this->m_fields->m_useLocal) return;
 
 		storeLocalDeaths(
 			this->m_fields->m_levelProps.levelId,
@@ -450,7 +458,7 @@ class $modify(DMPlayerObject, PlayerObject) {
 
 };
 
-$on_mod(Loaded) {
+$execute {
 
 	auto mod = Mod::get();
 
@@ -467,7 +475,7 @@ $on_mod(Loaded) {
 	log::debug("Version {}", settingVersion);
 	if (settingVersion < 0) settingVersion = 0;
 	if (settingVersion == 0) {
-		mod->setSettingValue("store-local-2",
+		mod->setSettingValue<std::string>("store-local-2",
 			mod->getSettingValue<bool>("store-local") ? "Always" : "Never"
 		);
 		settingVersion = 1;
