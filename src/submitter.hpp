@@ -8,8 +8,9 @@
 
 #define translate( X ) static_cast<int>(X / 30)
 
-int const MAX_RETRIES = 4;
-auto const RETRY_TIMEOUT = std::chrono::seconds(5);
+int const MAX_RETRIES = 8;
+auto const RETRY_TIMEOUT = std::chrono::seconds(15);
+// = 120 Seconds = 2 Minutes of retrying
 
 class Submitter {
 private:  

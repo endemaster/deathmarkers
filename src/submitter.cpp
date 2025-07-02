@@ -23,17 +23,27 @@ void Submitter::event(web::WebTask::Event* e) {
 
 			log::error("Posting Deaths failed: {} {}", code, body);
 
-			if (code >= 400 && code < 500) {
-				log::debug("Dropping submission due to 4xx error response.");
-			}
+			if (code == 429) {
+				auto timeoutHeader = res->header("Retry-After");
+				auto timeout = timeoutHeader.has_value() ?
+					std::chrono::seconds(atoi(timeoutHeader.value().c_str())) :
+					RETRY_TIMEOUT;
 
-			if (code >= 500 && code < 600 || code < 0) { // whatever 6xx responses mean
+				log::debug("Hit rate limit, using Retry-After header...");
+				std::thread([this, timeout]() {
+					std::this_thread::sleep_for(timeout);
+					this->submit();
+				}).detach();
+
+			} else if (code >= 400 && code < 500) {
+				log::debug("Dropping submission due to 4xx error response.");
+
+			} else if (code >= 500 && code < 600 || code < 0) { // whatever 6xx responses mean
 				log::debug("Waiting to retry...");
 				std::thread([this]() {
 					std::this_thread::sleep_for(RETRY_TIMEOUT);
 					this->submit();
 				}).detach();
-				return;
 			}
 		} else log::debug("Posted Deaths.");
 		// what can i say except
