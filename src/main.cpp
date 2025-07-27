@@ -12,8 +12,14 @@
 using namespace geode::prelude;
 using namespace dm;
 
+enum DMEvent {
+	LEVEL_LOAD,
+	DEATH,
+	RESET,
+	TOGGLE_PRACTICE
+};
+
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/GJGameLevel.hpp>
 class $modify(DMPlayLayer, PlayLayer) {
 
 	struct Fields {
@@ -22,6 +28,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		CCNode* m_dmNode = CCNode::create();
 		CCDrawNode* m_chartNode = nullptr;
 
+		bool m_drawn = false;
 		vector<DeathLocationMin> m_deaths;
 		vector<DeathLocationOut> m_submissions;
 
@@ -30,7 +37,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		struct playerData m_playerProps;
 		struct playingLevel m_levelProps;
 
-		bool m_useLocal;
+		bool m_useLocal = false;
 	};
 
 	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
@@ -77,14 +84,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		this->fetch(
 			[this](bool success) {
-				if (Mod::get()->getSettingValue<bool>("always-show")) {
-					log::debug("Always show enabled, rendering...");
-					this->renderMarkers(
-						this->m_fields->m_deaths.begin(),
-						this->m_fields->m_deaths.end()
-					);
-					this->renderHistogram();
-				}
+				if (!success)
+					return Notification::create("DeathMarkers could not load")->show();
+				this->checkDraw(LEVEL_LOAD);
 			}
 		);
 
@@ -167,10 +169,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 	void resetLevel() {
 
 		PlayLayer::resetLevel();
-
-		if (Mod::get()->getSettingValue<bool>("always-show")) return;
-
-		clearMarkers();
+		this->checkDraw(RESET);
 
 	}
 
@@ -190,13 +189,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		PlayLayer::togglePracticeMode(toggle);
 		this->m_fields->m_levelProps.practice = toggle;
 
-		if (Mod::get()->getSettingValue<bool>("always-show") && (!toggle || Mod::get()->getSettingValue<bool>("draw-in-practice"))) {
-			renderMarkers(
-				this->m_fields->m_deaths.begin(),
-				this->m_fields->m_deaths.end()
-			);
-			renderHistogram();
-		} else clearMarkers();
+		this->checkDraw(TOGGLE_PRACTICE);
 
 	}
 
@@ -336,6 +329,61 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
+	// Provides a central, consistent way to handle drawing state
+	bool shouldDraw() {
+		auto mod = Mod::get();
+		if (!dm::shouldDraw(this->m_fields->m_levelProps)) return false;
+
+		bool isDead = this->m_player1->m_isDead;
+		bool isPractice = this->m_fields->m_levelProps.practice ||
+			this->m_fields->m_levelProps.testmode;
+		auto settName = isPractice ? "condition-practice" : "condition-normal";
+		// Relevant condition setting for current mode
+		auto condSetting = mod->getSettingValue<string>(settName);
+
+		if (condSetting == "Always") return true;
+		if (condSetting == "Never") return false;
+		if (!isDead) return false;
+
+		if (!mod->getSettingValue<bool>("newbest-only")) return true;
+		if (this->m_fields->m_levelProps.platformer) return true;
+
+		int best = isPractice ?
+			this->m_level->m_practicePercent :
+			this->m_level->m_normalPercent.value();
+		if (best == 100 || getCurrentPercentInt() >= best) return true;
+		return false;
+
+	}
+
+	void checkDraw(DMEvent event) {
+		log::debug("Checking... {}", static_cast<int>(event));
+		bool should = this->shouldDraw();
+		log::debug("should = {} current = {}", should, this->m_fields->m_drawn);
+		if (should != this->m_fields->m_drawn) {
+			log::debug("Toggling...");
+			this->m_fields->m_drawn = should;
+
+			if (should) {
+				renderHistogram();
+				switch (event) {
+					case LEVEL_LOAD:
+					case TOGGLE_PRACTICE:
+						renderMarkers(
+							this->m_fields->m_deaths.begin(),
+							this->m_fields->m_deaths.end()
+						);
+						break;
+					default:
+						renderMarkersInFrame();
+						// TODO: highlight new death
+				}
+			} else {
+				clearMarkers();
+			}
+		}
+	}
+
 	void submitDeaths() {
 
 		if (!dm::shouldSubmit(this->m_fields->m_levelProps,
@@ -353,9 +401,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 		));
 		myjson.set("levelversion", matjson::Value(
 			this->m_level->m_levelVersion
-		));
-		myjson.set("practice", matjson::Value(
-			this->m_isPracticeMode
 		));
 		myjson.set("playername", matjson::Value(
 			this->m_fields->m_playerProps.username
@@ -421,38 +466,8 @@ class $modify(DMPlayerObject, PlayerObject) {
 		// deathLoc.itemdata = ...; // where the hell are the counters
 
 		playLayer->m_fields->m_submissions.push_back(deathLoc);
-
-		bool newBest = playLayer->m_fields->m_levelProps.platformer || (
-			playLayer->getCurrentPercentInt() >= playLayer->m_level->m_normalPercent.value() ||
-			playLayer->m_level->m_normalPercent.value() == 100
-		);
-		auto render = dm::shouldDraw(playLayer->m_fields->m_levelProps) &&
-			(!Mod::get()->getSettingValue<bool>("newbest-only") || newBest);
-
-		// Render Death Markers
-		if (render) {
-			double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
-
-			if (Mod::get()->getSettingValue<bool>("always-show")) {
-				playLayer->m_fields->m_dmNode->addChild(
-					deathLoc.createAnimatedNode(false, 0, fadeTime)
-				);
-			}
-			else {
-				playLayer->renderMarkersInFrame();
-				playLayer->m_fields->m_dmNode->addChild(
-					deathLoc.createAnimatedNode(true, 0, fadeTime)
-				);
-			}
-		}
-
-		// Add own death to current level's list
-		// after rendering because the current death's CCNode is being rendered separately
-		if (!Mod::get()->getSettingValue<bool>("normal-only")
-			|| !playLayer->m_fields->m_levelProps.platformer)
-			playLayer->m_fields->m_deaths.push_back(deathLoc);
-
-		if (render) playLayer->renderHistogram();
+		playLayer->m_fields->m_deaths.push_back(deathLoc);
+		playLayer->checkDraw(DEATH);
 
 	}
 
@@ -471,7 +486,7 @@ $execute {
 		log::debug("No value saved.");
 		settingVersion = 0;
 	}
-	
+
 	log::debug("Version {}", settingVersion);
 	if (settingVersion < 0) settingVersion = 0;
 	if (settingVersion == 0) {
@@ -483,5 +498,5 @@ $execute {
 	if (settingVersion > 1) settingVersion = 1;
 
 	mod->setSavedValue("setting-version", settingVersion);
-	
+
 };

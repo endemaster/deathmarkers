@@ -136,10 +136,6 @@ bool dm::shouldDraw(struct playingLevel& level) {
 	if (!playLayer) return false;
 	if (level.levelId == 0) return false; // Don't draw on local levels
 
-	bool isPractice = level.practice || level.testmode;
-	auto drawInPractice = mod->getSettingValue<bool>("draw-in-practice");
-	if (isPractice && !drawInPractice) return false;
-
 	float scale = mod->getSettingValue<float>("marker-scale");
 	if (scale != 0) return true;
 

@@ -31,7 +31,11 @@
 			"type": "string",
 			"name": "Use local deaths",
 			"description": "Store your deaths locally and only load them instead of the online collection. <cr>The mod does not store deaths locally if this is disabled.</c> This does not affect whether your deaths are submitted to the server.",
-			"one-of": ["Never", "Demons only", "Always"],
+			"one-of": [
+				"Never",
+				"Demons only",
+				"Always"
+			],
 			"default": "Never"
 		},
 		"normal-only": {
@@ -44,17 +48,25 @@
 			"type": "title",
 			"name": "Rendering conditions"
 		},
-		"always-show": {
-			"type": "bool",
-			"name": "Always show Markers in-game",
-			"description": "Draws Markers in-game even while playing normally. May impede visibility and performance, you should not normally use this.",
-			"default": false
+		"condition-normal": {
+			"type": "string",
+			"name": "When to draw in normal mode",
+			"one-of": [
+				"Never",
+				"On Death",
+				"Always"
+			],
+			"default": "On Death"
 		},
-		"draw-in-practice": {
-			"type": "bool",
-			"name": "Markers in Practice",
-			"description": "Whether to draw death markers in Practice Mode and Testmode.",
-			"default": false
+		"condition-practice": {
+			"type": "string",
+			"name": "When to draw in practice mode",
+			"one-of": [
+				"Never",
+				"On Death",
+				"Always"
+			],
+			"default": "Never"
 		},
 		"newbest-only": {
 			"type": "bool",
