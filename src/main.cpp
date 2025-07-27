@@ -1,7 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include <Geode/loader/Event.hpp>
-#include <Geode/ui/MDPopup.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 #include <vector>
 #include <string>
 #include <stdio.h>
@@ -16,7 +15,8 @@ enum DMEvent {
 	LEVEL_LOAD,
 	DEATH,
 	RESET,
-	TOGGLE_PRACTICE
+	TOGGLE_PRACTICE,
+	RESUME,
 };
 
 #include <Geode/modify/PlayLayer.hpp>
@@ -29,6 +29,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		CCDrawNode* m_chartNode = nullptr;
 
 		bool m_drawn = false;
+		bool m_checkPending = false;
 		vector<DeathLocationMin> m_deaths;
 		vector<DeathLocationOut> m_submissions;
 
@@ -43,8 +44,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
 
 		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) return false;
-
-		// TODO: Info-button?
 
 		// Prepare UI
 		this->m_fields->m_dmNode->setID("markers"_spr);
@@ -100,7 +99,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 	void setupHasCompleted() {
 
 		PlayLayer::setupHasCompleted();
-		if (Mod::get()->getSettingValue<bool>("always-show")) this->renderHistogram();
+		if (this->m_fields->m_drawn) this->renderHistogram();
 
 	}
 
@@ -170,6 +169,15 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		PlayLayer::resetLevel();
 		this->checkDraw(RESET);
+
+	}
+
+	void resume() {
+
+		PlayLayer::resume();
+		if (!this->m_fields->m_checkPending) return;
+		this->checkDraw(RESUME);
+		this->m_fields->m_checkPending = false;
 
 	}
 
@@ -360,6 +368,12 @@ class $modify(DMPlayLayer, PlayLayer) {
 		log::debug("Checking... {}", static_cast<int>(event));
 		bool should = this->shouldDraw();
 		log::debug("should = {} current = {}", should, this->m_fields->m_drawn);
+
+		if (!this->m_fields->m_fetched) {
+			log::debug("Deaths not fetched, deferring...");
+			return;
+		}
+
 		if (should != this->m_fields->m_drawn) {
 			log::debug("Toggling...");
 			this->m_fields->m_drawn = should;
@@ -369,6 +383,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 				switch (event) {
 					case LEVEL_LOAD:
 					case TOGGLE_PRACTICE:
+					case RESUME:
 						renderMarkers(
 							this->m_fields->m_deaths.begin(),
 							this->m_fields->m_deaths.end()
@@ -468,6 +483,38 @@ class $modify(DMPlayerObject, PlayerObject) {
 		playLayer->m_fields->m_submissions.push_back(deathLoc);
 		playLayer->m_fields->m_deaths.push_back(deathLoc);
 		playLayer->checkDraw(DEATH);
+
+	}
+
+};
+
+#include <Geode/modify/PauseLayer.hpp>
+class $modify(DMPauseLayer, PauseLayer) {
+
+  void customSetup() override {
+
+    PauseLayer::customSetup();
+
+		if (auto leftMenu = this->getChildByID("left-button-menu")) {
+			auto sprite = CircleButtonSprite::createWithSprite(
+				"death-marker.png"_spr,
+				0.81f, CircleBaseColor::Green,
+				CircleBaseSize::MediumAlt
+			);
+			sprite->setScale(0.6f);
+			auto button = CCMenuItemExt::createSpriteExtra(
+				sprite, [](CCNode*){
+					auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
+
+					geode::openSettingsPopup(Mod::get(), true);
+					playLayer->m_fields->m_checkPending = true;
+				}
+			);
+
+      button->setID("settings-button"_spr);
+			leftMenu->addChild(button);
+			leftMenu->updateLayout(true);
+		}
 
 	}
 

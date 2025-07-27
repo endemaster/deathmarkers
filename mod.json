@@ -71,7 +71,7 @@
 		"newbest-only": {
 			"type": "bool",
 			"name": "Show Markers only on New Best",
-			"description": "Whether to show death markers only when you achieve a new best percentage. Will show regardless in Platformer mode and if you have beaten the level before.",
+			"description": "Whether to show death markers only when you achieve a new best percentage.\nWill show regardless in Platformer mode and if you have beaten the level before.\nOnly applies if the relevant setting is \"On Death\".",
 			"default": false
 		},
 		"title-visuals": {
