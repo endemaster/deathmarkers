@@ -1,4 +1,11 @@
-#include "editor.hpp"
+#include <Geode/ui/LoadingSpinner.hpp>
+#include <Geode/utils/cocos.hpp>
+#include <Geode/utils/web.hpp>
+#include <Geode/loader/Event.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
+#include <vector>
+#include "shared.hpp"
+#include "cluster.hpp"
 
 using namespace dm;
 constexpr auto BUTTON_ID = "load-button"_spr;
