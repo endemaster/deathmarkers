@@ -67,7 +67,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		this->m_fields->m_levelProps.practice = this->m_isPracticeMode;
 		this->m_fields->m_levelProps.testmode = this->m_isTestMode;
 
-		std::string storeLocalStr = Mod::get()->getSettingValue<gd::string>("store-local-2");
+		std::string storeLocalStr = Mod::get()->getSettingValue<std::string>("store-local-2");
 		this->m_fields->m_useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 			this->m_level->m_stars >= 10;
 
@@ -339,7 +339,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			this->m_fields->m_levelProps.testmode;
 		auto settName = isPractice ? "condition-practice" : "condition-normal";
 		// Relevant condition setting for current mode
-		auto condSetting = mod->getSettingValue<string>(settName);
+		auto condSetting = mod->getSettingValue<std::string>(settName);
 
 		if (condSetting == "Always") return true;
 		if (condSetting == "Never") return false;
