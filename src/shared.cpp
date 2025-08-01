@@ -46,14 +46,9 @@ CCNode* DeathLocationMin::createNode(bool isCurrent, bool preAnim) const {
 	auto sprite = CCSprite::create("death-marker.png"_spr);
 	std::string const id = "marker"_spr;
 	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
-	if (isCurrent) {
-		sprite->setScale(markerScale * 1.5f);
-		sprite->setZOrder(2 << 29);
-	}
-	else {
-		sprite->setScale(markerScale);
-		sprite->setZOrder((2 << 29) - 1);
-	}
+
+	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
+
 	if (preAnim) {
 		auto point = CCPoint(this->pos.x, this->pos.y + markerScale * 4);
 		sprite->setPosition(point);
@@ -388,5 +383,20 @@ vector<DeathLocationMin>::iterator dm::binarySearchNearestXPosOnScreen(
 	else from = middle;
 
 	return binarySearchNearestXPosOnScreen(from, to, parent, x);
+
+}
+
+vector<DeathLocationMin>::iterator dm::binarySearchNearestXPos(
+	vector<DeathLocationMin>::iterator from,
+	vector<DeathLocationMin>::iterator to, float x) {
+
+	if (to - from <= 1) return from;
+
+	auto middle = from + ((to - from) >> 1);
+
+	if (middle->pos.x > x) to = middle;
+	else from = middle;
+
+	return binarySearchNearestXPos(from, to, x);
 
 }

@@ -32,6 +32,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		bool m_checkPending = false;
 		vector<DeathLocationMin> m_deaths;
 		vector<DeathLocationOut> m_submissions;
+		vector<DeathLocationMin>::iterator m_latest;
 
 		bool m_chartAttached = false;
 		bool m_fetched = false;
@@ -222,7 +223,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
 		for (auto deathLoc = begin; deathLoc < end; deathLoc++) {
 			auto node = deathLoc->createAnimatedNode(
-				false,
+				deathLoc == this->m_fields->m_latest,
 				(static_cast<double>(rand()) / RAND_MAX) * fadeTime,
 				fadeTime
 			);
@@ -242,7 +243,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		auto children = this->m_fields->m_dmNode->getChildren();
 		for (int i = 0; i < this->m_fields->m_dmNode->getChildrenCount(); i++) {
 			auto child = static_cast<CCNode*>(children->objectAtIndex(i));
-			child->setScale(inverseScale);
+			bool isCurrent = child->getZOrder() == CURRENT_ZORDER;
+
+			child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
 			child->setRotation(-sceneRotation);
 		}
 
@@ -391,11 +394,33 @@ class $modify(DMPlayLayer, PlayLayer) {
 						break;
 					default:
 						renderMarkersInFrame();
-						// TODO: highlight new death
+						// iterator equivalent of nullptr
+						this->m_fields->m_latest = this->m_fields->m_deaths.end();
 				}
 			} else {
 				clearMarkers();
 			}
+		} else if (event == DEATH) {
+			// = markers are not redrawn, but new one should appear
+
+			double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
+			auto node = this->m_fields->m_latest->createAnimatedNode(
+				true, 0, fadeTime
+			);
+			this->m_fields->m_dmNode->addChild(node);
+			updateMarkers(0.0f);
+
+			this->m_fields->m_latest = this->m_fields->m_deaths.end();
+		} else if (event == RESET) {
+			// = markers are not redrawn, but last one should shrink
+
+			// reset all nodes to regular z-order
+			auto children = this->m_fields->m_dmNode->getChildren();
+			for (int i = 0; i < this->m_fields->m_dmNode->getChildrenCount(); i++) {
+				static_cast<CCNode*>(children->objectAtIndex(i))
+					->setZOrder(OTHER_ZORDER);
+			}
+			updateMarkers(0.0f);
 		}
 	}
 
@@ -480,8 +505,21 @@ class $modify(DMPlayerObject, PlayerObject) {
 		// deathLoc.coin3 = ...;
 		// deathLoc.itemdata = ...; // where the hell are the counters
 
+		// for (auto i = playLayer->m_fields->m_deaths.begin(); i < playLayer->m_fields->m_deaths.end(); i++) {
+		// 	log::debug("{}, {}", i->pos, fmt::ptr(&*i));
+		// };
+
+		auto nearest = binarySearchNearestXPos(
+			playLayer->m_fields->m_deaths.begin(),
+			playLayer->m_fields->m_deaths.end(),
+			deathLoc.pos.x
+		);
+		// if (nearest->pos.x < deathLoc.pos.x) std::advance(nearest, 1);
+		playLayer->m_fields->m_latest =
+			playLayer->m_fields->m_deaths.insert(nearest, deathLoc);
+		// log::debug("this one: {}, {}", deathLoc.pos, fmt::ptr(&*playLayer->m_fields->m_latest));
+
 		playLayer->m_fields->m_submissions.push_back(deathLoc);
-		playLayer->m_fields->m_deaths.push_back(deathLoc);
 		playLayer->checkDraw(DEATH);
 
 	}

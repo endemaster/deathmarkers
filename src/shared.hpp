@@ -13,6 +13,9 @@ namespace dm {
 	auto const FORMAT_VERSION = 1;
 
 	auto const HTTP_TIMEOUT = std::chrono::seconds(15);
+	
+	constexpr int CURRENT_ZORDER = 2 << 29;
+	constexpr int OTHER_ZORDER = (2 << 29) - 1;
 
 	struct playerData {
 		std::string username = "";
@@ -106,5 +109,9 @@ namespace dm {
 	vector<DeathLocationMin>::iterator binarySearchNearestXPosOnScreen(
 		vector<DeathLocationMin>::iterator from,
 		vector<DeathLocationMin>::iterator to, CCLayer* parent, float x);
+
+	vector<DeathLocationMin>::iterator binarySearchNearestXPos(
+		vector<DeathLocationMin>::iterator from,
+		vector<DeathLocationMin>::iterator to, float x);
 
 }
