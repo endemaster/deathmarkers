@@ -124,19 +124,25 @@ bool dm::shouldSubmit(struct playingLevel& level, struct playerData& player) {
 	return true;
 };
 
-bool dm::shouldDraw(struct playingLevel& level) {
+bool dm::willEverDraw(struct playingLevel& level) {
 	auto playLayer = PlayLayer::get();
 	auto mod = Mod::get();
 
 	if (!playLayer) return false;
 	if (level.levelId == 0) return false; // Don't draw on local levels
 
-	float scale = mod->getSettingValue<float>("marker-scale");
-	if (scale != 0) return true;
+	// We can't check settings here since they can change whenever
+	// LEGACY: Test settings here, refresh when changed, fetch late if needed
+	// float scale = mod->getSettingValue<float>("marker-scale");
+	// int histHeight = mod->getSettingValue<int>("prog-bar-hist-height");
+	// if (scale == 0 && histHeight == 0) return false;
 
-	int histHeight = mod->getSettingValue<int>("prog-bar-hist-height");
-	if (histHeight != 0) return true;
+	// string normalCond = mod->getSettingValue<std::string>("condition-normal");
+	// if (normalCond != "Never") return true;
+	// string practiceCond = mod->getSettingValue<std::string>("condition-practice");
+	// if (practiceCond != "Never") return true;
 
+	// return mod->getSettingValue<bool>("show-in-pause");
 	return true;
 };
 

@@ -91,7 +91,7 @@ namespace dm {
 	};
 
 	bool shouldSubmit(struct playingLevel& level, struct playerData& player);
-	bool shouldDraw(struct playingLevel& level);
+	bool willEverDraw(struct playingLevel& level);
 
 	std::string makeRequestURL(char const* endpoint);
 

@@ -51,6 +51,7 @@
 		"condition-normal": {
 			"type": "string",
 			"name": "When to draw in normal mode",
+			"description": "Determines under which condition markers will be drawn when you play in normal mode.",
 			"one-of": [
 				"Never",
 				"On Death",
@@ -61,6 +62,7 @@
 		"condition-practice": {
 			"type": "string",
 			"name": "When to draw in practice mode",
+			"description": "Determines under which condition markers will be drawn when you play in practice mode or testmode.",
 			"one-of": [
 				"Never",
 				"On Death",
@@ -72,6 +74,12 @@
 			"type": "bool",
 			"name": "Show Markers only on New Best",
 			"description": "Whether to show death markers only when you achieve a new best percentage.\nWill show regardless in Platformer mode and if you have beaten the level before.\nOnly applies if the relevant setting is \"On Death\".",
+			"default": false
+		},
+		"show-in-pause": {
+			"type": "bool",
+			"name": "Show Markers when pausing",
+			"description": "If enabled, always draws death markers when you pause the game, regardless of other settings.",
 			"default": false
 		},
 		"title-visuals": {

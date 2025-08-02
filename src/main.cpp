@@ -14,6 +14,7 @@ using namespace dm;
 enum DMEvent {
 	LEVEL_LOAD,
 	DEATH,
+	PAUSE,
 	RESET,
 	TOGGLE_PRACTICE,
 	RESUME,
@@ -29,7 +30,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		CCDrawNode* m_chartNode = nullptr;
 
 		bool m_drawn = false;
-		bool m_checkPending = false;
+		bool m_willEverDraw = true;
 		vector<DeathLocationMin> m_deaths;
 		vector<DeathLocationOut> m_submissions;
 		vector<DeathLocationMin>::iterator m_latest;
@@ -74,7 +75,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		log::debug("{} {} {}", storeLocalStr, this->m_level->m_stars, this->m_fields->m_useLocal);
 
 		// Don't even continue to list if we're not going to show them anyway
-		if (!dm::shouldDraw(this->m_fields->m_levelProps)) {
+		this->m_fields->m_willEverDraw =
+			dm::willEverDraw(this->m_fields->m_levelProps);
+		if (!this->m_fields->m_willEverDraw) {
 			this->m_fields->m_fetched = true;
 			return true;
 		}
@@ -173,12 +176,17 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
+	void pauseGame(bool p0) {
+
+		PlayLayer::pauseGame(p0);
+		this->checkDraw(PAUSE);
+
+	}
+
 	void resume() {
 
 		PlayLayer::resume();
-		if (!this->m_fields->m_checkPending) return;
 		this->checkDraw(RESUME);
-		this->m_fields->m_checkPending = false;
 
 	}
 
@@ -218,15 +226,18 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void renderMarkers(const vector<DeathLocationMin>::iterator begin, const vector<DeathLocationMin>::iterator end) {
+	void renderMarkers(const vector<DeathLocationMin>::iterator begin,
+		const vector<DeathLocationMin>::iterator end, bool animate) {
 
 		double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
 		for (auto deathLoc = begin; deathLoc < end; deathLoc++) {
-			auto node = deathLoc->createAnimatedNode(
+			CCNode* node;
+			if (animate) node = deathLoc->createAnimatedNode(
 				deathLoc == this->m_fields->m_latest,
 				(static_cast<double>(rand()) / RAND_MAX) * fadeTime,
 				fadeTime
 			);
+			else node = deathLoc->createNode(deathLoc == this->m_fields->m_latest);
 			this->m_fields->m_dmNode->addChild(node);
 		}
 		updateMarkers(0.0f);
@@ -318,7 +329,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void renderMarkersInFrame() {
+	void renderMarkersInFrame(bool animate) {
 
 		auto begin = this->m_fields->m_deaths.begin();
 		auto end = this->m_fields->m_deaths.end();
@@ -336,16 +347,18 @@ class $modify(DMPlayLayer, PlayLayer) {
 		end = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
 			halfWinWidth + winDiagonal);
 
-		renderMarkers(begin, end);
+		renderMarkers(begin, end, animate);
 
 	}
 
 	// Provides a central, consistent way to handle drawing state
 	bool shouldDraw() {
 		auto mod = Mod::get();
-		if (!dm::shouldDraw(this->m_fields->m_levelProps)) return false;
+		if (!this->m_fields->m_willEverDraw) return false;
 
-		bool isDead = this->m_player1->m_isDead;
+		auto pauseSetting = mod->getSettingValue<bool>("show-in-pause");
+		if (pauseSetting && this->m_isPaused) return true;
+
 		bool isPractice = this->m_fields->m_levelProps.practice ||
 			this->m_fields->m_levelProps.testmode;
 		auto settName = isPractice ? "condition-practice" : "condition-normal";
@@ -354,7 +367,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		if (condSetting == "Always") return true;
 		if (condSetting == "Never") return false;
-		if (!isDead) return false;
+		if (!this->m_player1->m_isDead) return false;
 
 		if (!mod->getSettingValue<bool>("newbest-only")) return true;
 		if (this->m_fields->m_levelProps.platformer) return true;
@@ -389,18 +402,19 @@ class $modify(DMPlayLayer, PlayLayer) {
 					case RESUME:
 						renderMarkers(
 							this->m_fields->m_deaths.begin(),
-							this->m_fields->m_deaths.end()
+							this->m_fields->m_deaths.end(),
+							true
 						);
 						break;
 					default:
-						renderMarkersInFrame();
+						renderMarkersInFrame(event != PAUSE);
 						// iterator equivalent of nullptr
 						this->m_fields->m_latest = this->m_fields->m_deaths.end();
 				}
 			} else {
 				clearMarkers();
 			}
-		} else if (event == DEATH) {
+		} else if (event == DEATH && should) {
 			// = markers are not redrawn, but new one should appear
 
 			double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
@@ -411,7 +425,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			updateMarkers(0.0f);
 
 			this->m_fields->m_latest = this->m_fields->m_deaths.end();
-		} else if (event == RESET) {
+		} else if (event == RESET && should) {
 			// = markers are not redrawn, but last one should shrink
 
 			// reset all nodes to regular z-order
@@ -545,7 +559,6 @@ class $modify(DMPauseLayer, PauseLayer) {
 					auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
 
 					geode::openSettingsPopup(Mod::get(), true);
-					playLayer->m_fields->m_checkPending = true;
 				}
 			);
 
