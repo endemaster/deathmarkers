@@ -636,9 +636,21 @@ $execute {
 	log::debug("Version {}", settingVersion);
 	if (settingVersion < 0) settingVersion = 0;
 	if (settingVersion == 0) {
+		// Update "Use local deaths" to its new scheme
 		mod->setSettingValue<std::string>("store-local-2",
 			mod->getSettingValue<bool>("store-local") ? "Always" : "Never"
 		);
+
+		// Update "Always show" & "Show in practice" to the new scheme
+		bool always = mod->getSettingValue<bool>("always-show");
+		mod->setSettingValue<std::string>("condition-normal",
+			always ? "Always" : "On Death"
+		);
+		mod->setSettingValue<std::string>("condition-practice",
+			mod->getSettingValue<bool>("draw-in-practice") ?
+				(always ? "Always" : "On Death") : "Never"
+		);
+
 		settingVersion = 1;
 	}
 	if (settingVersion > 1) settingVersion = 1;
