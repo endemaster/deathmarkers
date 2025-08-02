@@ -1,6 +1,8 @@
+# DeathMarkers Documentation
+
 This document explains the data formats of server communication and the database.
 
-# Formats
+## Formats
 
 The system works with format numbers, starting from 1 as the first version. They differentiate themselves by the organization and quantity of features that can be stored with them.
 
@@ -16,11 +18,11 @@ The system works with format numbers, starting from 1 as the first version. They
 
 > Format 2 is accepted for submissions and treated the same as format 1 for listing, but ignored for analysis
 
-# Database
+## Database
 
 The database contains one table per format version, in order to store the corresponding incoming deaths in the correct version table, and sending deaths combined from all formats.
 
-## Table `format1`
+### Table `format1`
 
 | Column Name | Data Type | Constraints | Description |
 |-|-|-|-|
@@ -32,7 +34,7 @@ The database contains one table per format version, in order to store the corres
 | y | FLOAT(10,2) | NOT NULL | The y-position of the player at the time of death. |
 | percentage | SMALLINT | UNSIGNED NOT NULL | For normal levels, the percentage of the player 0-100, and 101 for a level finish.<br>For platformer levels, the time of death in seconds.
 
-## Table `format2`
+### Table `format2`
 
 | Column Name | Data Type | Constraints | Description |
 |-|-|-|-|
@@ -42,14 +44,14 @@ The database contains one table per format version, in order to store the corres
 
 When a player finishes the level, an entry with `percentage = 100` is added. Although this is not a death in the sense of the word, it serves an analytical purpose for detecting if a given player (based on `userident`) has ended up beating the level, as well as discovering potential unintended secret ways.
 
-## Indexes
+### Indexes
 
 To speed up queries for specific levels, the database also employs an index for every table:
 
 `CREATE INDEX IF NOT EXISTS format1index ON format1 (levelid);`
 `CREATE INDEX IF NOT EXISTS format1index ON format2 (levelid);`
 
-## `userident`
+### `userident`
 
 The `userident` is used to group together deaths from an individual player playing a specific level. This is anonymized in order to make grouping across levels difficult. The three identification components are: **Account Name**, **Level ID**, **User ID**, which are arranged as `[account name]_[user id]_[level id]` and then hashed using the SHA-1 algorithm.
 
@@ -59,7 +61,7 @@ Since the `userident` is stored with each death and could easily be computed to 
 
 > The server accepts either account name and user id to be sent OR a complete and proper userident. Geometry Dash and Geode cannot natively hash arbitrary strings, and - in my eyes - a dependency for it is unnecessary. The server creates the userident and immediately forgets about the user's data.
 
-### Example
+#### Example
 
 - Player: **RobTop** (User-ID **16**)
 - Level: Bloodbath, ID **10565740**
@@ -73,21 +75,22 @@ Select salt: e.g. `ZqQhF28asA` <- Different every time a level analysis is reque
 ⇒ `cba4a35e4ee458178b18d4c8ebb836a518b4df4b_ZqQhF28asA`
 ⇒ `aed5ab073efad9fe738eacb2bebeb174b2ceae6b` ← This is what is sent from /analysis
 
-### But what about people playing without an account?
+#### But what about people playing without an account?
 
 In principle, we're accessing `GameManager::m_playerUserID` and `GameManager::m_playerName` which are the user id (a separate id from your account id and assigned to logged out users as well) and account name (same as, say `GJAccountManager::m_username`, and if not logged in, taking the name in the icon kit).
 
 Everyone playing logged in will be uniquely identified. Everyone else is assumed an individual player if they play on one device and do not change their name.
 
-# API
+## API
 
 **Base URL**: `https://deathmarkers.masp005.dev/`
 
 Every request and response body is in the format **JSON** (MIME-Type `application/json`).
 
-## GET `/list`
+### GET `/list`
 
 Parameter(s):
+
 - `levelid`: The ID of the level requested.
 - `platformer` (boolean): If `false`, ignores entries with percentage > 100. See [§ Table DEATHS](#table-format1).
 - Optional: `practice` (boolean): If `false`, ignores deaths that occurred in practice mode (default `true`)
@@ -100,9 +103,10 @@ Delivers (`text/csv`):
 
 This endpoint is intended for a regular playthrough to display Mario Maker-style death pins and a bar graph on the percentage.
 
-## GET `/analysis`
+### GET `/analysis`
 
 Parameter(s):
+
 - `levelid`: The ID of the level requested.
 - Optional: `response`: responds using specified data format, One of: `csv` (default), [`bin`](#binary-transmission)
 
@@ -115,14 +119,16 @@ See [§ Table DEATHS](#table-format1) for information on each property.
 
 This endpoint is intended for level creators to analyze the deaths in their level to improve the gameplay. It is not restricted to the actual level creator to allow anyone to learn from others' levels.
 
-## POST `/submit`
+### POST `/submit`
 
 This parameter in particular is not meant for public access. It should only be used by the mod and is only documented for contributors.
 
 Parameter(s):
+
 - `levelid`: The ID of the level requested.
 
 Body Data (`application/json`):
+
 - `format`: (int): Format Version Number, for the following always 1.
 - Fallback: `levelid` (int): The ID of the level. (Required only if equivalent parameter is not given)
 - Optional: `levelversion` (int): Version number of the level. 0 by default.
@@ -133,6 +139,7 @@ Body Data (`application/json`):
      The hash will be calculated by the server.
 
 The following can either be part of the root object or individual objects in an array `deaths`:
+
 - Optional: `practice` (bool): Whether the death occurred in practice mode. `false` by default.
 - `x` (float): x-position
 - `y` (float): y-position
@@ -149,11 +156,11 @@ The following can either be part of the root object or individual objects in an 
 
 Delivers: `4xx` or `204` Status. `4xx` responses supply a human-readable error source.
 
-## Rate Limits
+### Rate Limits
 
 The server limits requests per IP to 2 requests per 8 seconds. (only applies to `/list`, `/analysis` and `/submit`). If one IP breaks this limit for 2 cycles in a row, it is blocked for one hour.
 
-# Binary transmission
+## Binary transmission
 
 Using `&response=bin` on `/list` and `/analysis` yields the requested data in binary format for faster parsing and ~1/3 the transmission size. Due to the constant-size data types of death objects, the structure of binary responses is simple:
 
@@ -161,6 +168,29 @@ Using `&response=bin` on `/list` and `/analysis` yields the requested data in bi
 
 ![Binary Arrangement Breakdown](./binary-arrangement.png)
 
-* `x` and `y` are encoded using **binary32** (IEEE 754) (aka. float) into 4 bytes in **little endian**.
-* `percentage` is a **little endian** 2-byte/16-bit integer.
-* The very first byte of the response is a **versioning byte** for future compatibility, deaths only start after.
+- `x` and `y` are encoded using **binary32** (IEEE 754) (aka. float) into 4 bytes in **little endian**.
+- `percentage` is a **little endian** 2-byte/16-bit integer.
+- The very first byte of the response is a **versioning byte** for future compatibility, deaths only start after.
+
+## Upgrading Settings
+
+v1.4.0 is the first version to replace a set of settings with a new way to control the same stuff. To preserve the player's chosen behaviour, the old settings have to be ported to the new settings scheme. Below is an overview of the steps taken in each "settings version" (which is stored in the mod's saved values as offered by Geode). This translation is done in the `$execute` directive at the end of `main.cpp`.
+
+### Settings Version 0 -> 1
+
+Changed: Use local deaths (boolean) -> Use local death (enum)
+
+| Old Value | New Value |
+|-|-|
+| false | "Never" |
+| | "Demons only" |
+| true | "Always |
+
+Changed: Always show Markers & Markers in Practice -> When to draw in normal mode & "-" practice mode
+
+| Always show Markers | Markers in Practice | When to draw in normal mode | "-" practice mode |
+|-|-|-|-|
+| false | false | "On Death" | "Never" |
+| false | true | "On Death" | "On Death" |
+| true | false | "Always" | "Never" |
+| true | true | "Always" | "Always" |
