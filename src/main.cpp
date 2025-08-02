@@ -41,6 +41,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		struct playingLevel m_levelProps;
 
 		bool m_useLocal = false;
+		bool m_normalOnly = false;
 	};
 
 	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
@@ -71,6 +72,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		std::string storeLocalStr = Mod::get()->getSettingValue<std::string>("store-local-2");
 		this->m_fields->m_useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 			this->m_level->m_stars >= 10;
+		this->m_fields->m_normalOnly = Mod::get()->getSettingValue<bool>("normal-only");
 
 		log::debug("{} {} {}", storeLocalStr, this->m_level->m_stars, this->m_fields->m_useLocal);
 
@@ -160,7 +162,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		req.param("levelid", this->m_fields->m_levelProps.levelId);
 		req.param("platformer", this->m_fields->m_levelProps.platformer ? "true" : "false");
-		req.param("practice", Mod::get()->getSettingValue<bool>("normal-only") ? "false" : "true");
+		req.param("practice", this->m_fields->m_normalOnly ? "false" : "true");
 		req.param("response", "bin");
 		req.userAgent(HTTP_AGENT);
 		req.timeout(HTTP_TIMEOUT);
@@ -571,19 +573,36 @@ class $modify(DMPauseLayer, PauseLayer) {
 						});
 
 					this->m_fields->m_listener->bind([](geode::Popup<geode::Mod*>::CloseEvent* e) {
+						auto mod = Mod::get();
+
 						auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
-						auto storeLocalStr = Mod::get()->getSettingValue<std::string>("store-local-2");
+						auto storeLocalStr = mod->getSettingValue<std::string>("store-local-2");
 						auto useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 							playLayer->m_level->m_stars >= 10;
+						auto normalOnly = mod->getSettingValue<bool>("normal-only");
 
-						if (playLayer->m_fields->m_useLocal == useLocal) return;
+						playLayer->checkDraw(PAUSE);
 
-						std::string message = "<co>\"Use Local Deats\" has changed.</c>\n"
-							"For this change to take effect, you need to <cl>quit and rejoin "
-							"the level</c>.\nCurrently, you are ";
-						if (!playLayer->m_fields->m_useLocal) message += "are <cr>not</c>";
-						else message += "<cj>are</c>";
-						message += " using local deaths.";
+						bool useLocalChanged = playLayer->m_fields->m_useLocal != useLocal;
+						bool normalOnlyChanged = playLayer->m_fields->m_normalOnly != normalOnly;
+						if (!useLocalChanged && !normalOnlyChanged) return;
+
+						std::string message = "<co>";
+						if (useLocalChanged) message += "\"Use Local Deats\"";
+						if (useLocalChanged && normalOnlyChanged) message += " and ";
+						if (normalOnlyChanged) message += "\"Normal Mode Deaths only\"";
+						message += (useLocalChanged && normalOnlyChanged) ? " have" : " has";
+						message += " changed.</c>\nFor this change to take effect, you need "
+							"to <cl>quit and rejoin the level</c>.";
+						if (useLocalChanged) message +=
+							std::string("\nCurrently, you ") +
+								(playLayer->m_fields->m_useLocal ? "<cj>are</c>" : "are <cr>not</c>")
+								+ " using local deaths.";
+						if (normalOnlyChanged) message +=
+							std::string("\nCurrently, you ") +
+								(playLayer->m_fields->m_normalOnly ? "<cj>only see normal mode</c>" : "see <cj>all</c>")
+								+ " deaths.";
+
 						FLAlertLayer::create(
 							"Settings changed", message, "OK"
 						)->show();
