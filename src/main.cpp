@@ -543,6 +543,12 @@ class $modify(DMPlayerObject, PlayerObject) {
 #include <Geode/modify/PauseLayer.hpp>
 class $modify(DMPauseLayer, PauseLayer) {
 
+	using CloseEventListener = EventListener<geode::Popup<geode::Mod*>::CloseEventFilter>;
+
+	struct Fields {
+		std::unique_ptr<CloseEventListener> m_listener;
+	};
+
   void customSetup() override {
 
     PauseLayer::customSetup();
@@ -554,11 +560,34 @@ class $modify(DMPauseLayer, PauseLayer) {
 				CircleBaseSize::MediumAlt
 			);
 			sprite->setScale(0.6f);
-			auto button = CCMenuItemExt::createSpriteExtra(
-				sprite, [](CCNode*){
-					auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
 
-					geode::openSettingsPopup(Mod::get(), true);
+			auto button = CCMenuItemExt::createSpriteExtra(
+				sprite, [this](CCNode*){
+					auto popup = geode::openSettingsPopup(Mod::get(), true);
+
+					this->m_fields->m_listener =
+						std::make_unique<CloseEventListener>(CloseEventListener{
+							PopupBypass::listenForCloseOn(popup)
+						});
+
+					this->m_fields->m_listener->bind([](geode::Popup<geode::Mod*>::CloseEvent* e) {
+						auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
+						auto storeLocalStr = Mod::get()->getSettingValue<std::string>("store-local-2");
+						auto useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
+							playLayer->m_level->m_stars >= 10;
+
+						if (playLayer->m_fields->m_useLocal == useLocal) return;
+
+						std::string message = "<co>\"Use Local Deats\" has changed.</c>\n"
+							"For this change to take effect, you need to <cl>quit and rejoin "
+							"the level</c>.\nCurrently, you are ";
+						if (!playLayer->m_fields->m_useLocal) message += "are <cr>not</c>";
+						else message += "<cj>are</c>";
+						message += " using local deaths.";
+						FLAlertLayer::create(
+							"Settings changed", message, "OK"
+						)->show();
+					});
 				}
 			);
 

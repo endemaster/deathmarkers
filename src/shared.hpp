@@ -115,3 +115,17 @@ namespace dm {
 		vector<DeathLocationMin>::iterator to, float x);
 
 }
+
+// for whatever fucking reason, listenForClose is protected, so this is a bypass class
+class PopupBypass : public geode::Popup<geode::Mod*> {
+public:
+	// PopupBypass() : geode::Popup<geode::Mod*>() {};
+
+	static geode::Popup<geode::Mod*>::CloseEventFilter listenForCloseOn(geode::Popup<geode::Mod*>* popup) {
+		return static_cast<PopupBypass*>(popup)->listenForCloseBypass();
+	};
+
+	geode::Popup<geode::Mod*>::CloseEventFilter listenForCloseBypass() {
+		return this->listenForClose();
+	}
+};
