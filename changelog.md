@@ -9,9 +9,23 @@ This document only concerns the changelog of the **Mod**, not the server.
 
 ## [Unreleased]
 
+### Added
+
+- New option variant of local deaths, only activating if playing a demon level
+- New options for customizing when the game shall draw markers
+- Settings button in the pause menu
+- Option to show markers when the game is paused
+
 ### Changed
 
-- Upgrade to Geode v4.6.1
+- Upgrade to Geode v4.6.3
+- Use Geode's BasedButton for the editor button (allows generic retexturing)
+- Properly handle 429 submission response, extend retry time & count
+
+### Fixed
+
+- Marker of the latest death is now properly highlighted, even if markers are shown all the time
+- Practice mode is now properly submitted for each death
 
 ## [1.3.2] - 2025-06-11
 
