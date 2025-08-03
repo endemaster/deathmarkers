@@ -151,6 +151,17 @@ bool dm::willEverDraw(struct playingLevel& level) {
 std::string dm::makeRequestURL(char const* endpoint) {
 	auto mod = Mod::get();
 	auto settValue = mod->getSettingValue<std::string>("server-url");
+
+	// trim whitespace at the end (from https://stackoverflow.com/a/217605)
+	auto endWhitespace = std::find_if(settValue.rbegin(), settValue.rend(),
+		[](unsigned char ch) {
+			return !std::isspace(ch);
+		}).base();
+
+	if (endWhitespace != settValue.end()) {
+		settValue.erase(endWhitespace, settValue.end());
+		mod->setSettingValue("server-url", settValue);
+	}
 	if (!settValue.ends_with("/")) {
 		settValue.append("/");
 		mod->setSettingValue("server-url", settValue);
