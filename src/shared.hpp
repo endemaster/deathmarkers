@@ -60,6 +60,7 @@ namespace dm {
 		bool coin3 = false;
 		int itemdata = 0;
 		*/
+		bool practice = false;
 		std::time_t realTime = 0;
 		DeathLocationOut(float x, float y);
 		DeathLocationOut(CCPoint pos);

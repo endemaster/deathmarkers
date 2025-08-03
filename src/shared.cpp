@@ -81,6 +81,7 @@ void DeathLocationOut::addToJSON(matjson::Value* json) const {
 	json->set("x", matjson::Value(this->pos.x));
 	json->set("y", matjson::Value(this->pos.y));
 	json->set("percentage", matjson::Value(this->percentage));
+	json->set("practice", matjson::Value(this->practice));
 	//json->set("coins", matjson::Value(this->coin1 | this->coin2 << 1 | this->coin3 << 2));
 	//json->set("itemdata", matjson::Value(this->itemdata));
 }

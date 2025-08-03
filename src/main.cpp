@@ -521,19 +521,19 @@ class $modify(DMPlayerObject, PlayerObject) {
 		// deathLoc.coin3 = ...;
 		// deathLoc.itemdata = ...; // where the hell are the counters
 
-		// for (auto i = playLayer->m_fields->m_deaths.begin(); i < playLayer->m_fields->m_deaths.end(); i++) {
-		// 	log::debug("{}, {}", i->pos, fmt::ptr(&*i));
-		// };
+		bool isPractice = playLayer->m_fields->m_levelProps.practice ||
+			playLayer->m_fields->m_levelProps.testmode;
+		deathLoc.practice = isPractice;
 
-		auto nearest = binarySearchNearestXPos(
-			playLayer->m_fields->m_deaths.begin(),
-			playLayer->m_fields->m_deaths.end(),
-			deathLoc.pos.x
-		);
-		// if (nearest->pos.x < deathLoc.pos.x) std::advance(nearest, 1);
-		playLayer->m_fields->m_latest =
-			playLayer->m_fields->m_deaths.insert(nearest, deathLoc);
-		// log::debug("this one: {}, {}", deathLoc.pos, fmt::ptr(&*playLayer->m_fields->m_latest));
+		if (!playLayer->m_fields->m_normalOnly || !isPractice) {
+			auto nearest = binarySearchNearestXPos(
+				playLayer->m_fields->m_deaths.begin(),
+				playLayer->m_fields->m_deaths.end(),
+				deathLoc.pos.x
+			);
+			playLayer->m_fields->m_latest =
+				playLayer->m_fields->m_deaths.insert(nearest, deathLoc);
+		}
 
 		playLayer->m_fields->m_submissions.push_back(deathLoc);
 		playLayer->checkDraw(DEATH);
