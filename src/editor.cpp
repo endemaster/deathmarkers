@@ -157,7 +157,6 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 
 		this->m_fields->m_stackNode->removeAllChildrenWithCleanup(true);
 		for (auto stack = deathStacks->begin(); stack < deathStacks->end(); stack++) {
-			// TODO: separate Texture for zero-size stack
 			auto sprite = CCSprite::create("marker-group.png"_spr);
 			sprite->setID("marker-stack"_spr);
 			sprite->setScale(max(stack->circle.r * 2.125f, maxDistance / 2) / sprite->getContentWidth());
@@ -203,8 +202,6 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 					return a.userIdent.compare(b.userIdent) < 0;
 				}
 			);
-
-			// TODO: analyze data
 		}
 
 		completed.clear();
@@ -338,6 +335,8 @@ class $modify(DMEditorPauseLayer, EditorPauseLayer) {
 				editor->toggleDeathMarkers();
 			}
 		);
+		this->m_fields->m_button->setUserObject("alphalaneous.tooltips/tooltip",
+			CCString::create("DeathMarkers Editor Integration"));
 		this->m_fields->m_button->setID(BUTTON_ID);
 		editor->m_fields->m_enabled ?
 			this->m_fields->m_button->selected() :

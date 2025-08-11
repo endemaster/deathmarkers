@@ -611,6 +611,8 @@ class $modify(DMPauseLayer, PauseLayer) {
 			);
 
       button->setID("settings-button"_spr);
+			button->setUserObject("alphalaneous.tooltips/tooltip",
+				CCString::create("DeathMarkers Settings"));
 			leftMenu->addChild(button);
 			leftMenu->updateLayout(true);
 		}
