@@ -342,7 +342,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		float winDiagonal =
 			(sqrt(winSize.width * winSize.width + winSize.height * winSize.height)
 			/ this->m_objectLayer->getScale() + 70) / 2;
-		log::debug("{} {}", halfWinWidth, winDiagonal);
+		// log::debug("{} {}", halfWinWidth, winDiagonal);
 
 		begin = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
 			halfWinWidth - winDiagonal);
@@ -369,7 +369,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		if (condSetting == "Always") return true;
 		if (condSetting == "Never") return false;
-		if (!this->m_player1->m_isDead) return false;
+		if (!this->m_player1->m_isDead && !this->m_player2->m_isDead) return false;
 
 		if (!mod->getSettingValue<bool>("newbest-only")) return true;
 		if (this->m_fields->m_levelProps.platformer) return true;
@@ -383,9 +383,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 	}
 
 	void checkDraw(DMEvent event) {
-		log::debug("Checking... {}", static_cast<int>(event));
 		bool should = this->shouldDraw();
-		log::debug("should = {} current = {}", should, this->m_fields->m_drawn);
 
 		if (!this->m_fields->m_fetched) {
 			log::debug("Deaths not fetched, deferring...");
