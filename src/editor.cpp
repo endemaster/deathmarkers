@@ -250,22 +250,20 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 			this->m_fields->m_dmNode->addChild(node);
 		}
 
-		if (!this->m_fields->m_darkNode) {
-			auto winSize = CCDirector::sharedDirector()->getWinSize();
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-			this->m_fields->m_darkNode = CCSprite::createWithSpriteFrameName("lightsquare_01_01_color_001.png");
-			this->m_fields->m_darkNode->setID("darkener"_spr);
-			auto& spriteSize = this->m_fields->m_darkNode->getContentSize();
-			this->m_fields->m_darkNode->setScale(
-				winSize.width / spriteSize.width,
-				winSize.height / spriteSize.height
-			);
-			this->m_fields->m_darkNode->setPosition(CCPoint(0, 0));
-			this->m_fields->m_darkNode->setAnchorPoint(CCPoint(0, 0));
-			this->m_fields->m_darkNode->setColor({0, 0, 0});
-			this->m_fields->m_darkNode->setOpacity(Mod::get()->getSettingValue<int64_t>("darken-editor"));
-			this->m_fields->m_darkNode->setZOrder(-4);
-		}
+		this->m_fields->m_darkNode = CCSprite::createWithSpriteFrameName("lightsquare_01_01_color_001.png");
+		this->m_fields->m_darkNode->setID("darkener"_spr);
+		auto& spriteSize = this->m_fields->m_darkNode->getContentSize();
+		this->m_fields->m_darkNode->setScale(
+			winSize.width / spriteSize.width,
+			winSize.height / spriteSize.height
+		);
+		this->m_fields->m_darkNode->setPosition(CCPoint(0, 0));
+		this->m_fields->m_darkNode->setAnchorPoint(CCPoint(0, 0));
+		this->m_fields->m_darkNode->setColor({0, 0, 0});
+		this->m_fields->m_darkNode->setOpacity(Mod::get()->getSettingValue<int64_t>("darken-editor"));
+		this->m_fields->m_darkNode->setZOrder(-4);
 
 		this->m_editorUI->addChild(this->m_fields->m_darkNode);
 
