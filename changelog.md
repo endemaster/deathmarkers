@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
-## [Unreleased]
+## [1.4.0] - 2025-08-12
 
 ### Added
 
@@ -18,7 +18,7 @@ This document only concerns the changelog of the **Mod**, not the server.
 
 ### Changed
 
-- Upgrade to Geode v4.6.3
+- Upgrade to Geode v4.7.0
 - Use Geode's BasedButton for the editor button (allows generic retexturing)
 - Properly handle 429 submission response, extend retry time & count
 
