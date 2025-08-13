@@ -1,6 +1,6 @@
 #pragma once
 #include "shared.hpp"
-#include "smallestCircle.hpp"
+#include "lib/smallestCircle.hpp"
 
 namespace dm {
 

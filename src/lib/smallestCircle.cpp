@@ -1,19 +1,19 @@
-/* 
+/*
  * Smallest enclosing circle - Library (C++)
- * 
+ *
  * Copyright (c) 2021 Project Nayuki
  * https://www.nayuki.io/page/smallest-enclosing-circle
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program (see COPYING.txt and COPYING.LESSER.txt).
  * If not, see <http://www.gnu.org/licenses/>.
@@ -65,7 +65,7 @@ static std::default_random_engine randGen((std::random_device())());
 Circle dm::makeSmallestEnclosingCircle(vector<CCPoint> points) {
 	// Randomize order
 	std::shuffle(points.begin(), points.end(), randGen);
-	
+
 	// Progressively add points to circle or recompute circle
 	Circle c = Circle::INVALID;
 	for (size_t i = 0; i < points.size(); i++) {
@@ -98,14 +98,14 @@ static Circle makeSmallestEnclosingCircleTwoPoints(const vector<CCPoint> &points
 	Circle circ = dm::makeDiameter(p, q);
 	Circle left  = Circle::INVALID;
 	Circle right = Circle::INVALID;
-	
+
 	// For each point not in the two-point circle
 	CCPoint pq = q - p;
 	for (size_t i = 0; i < end; i++) {
 		const CCPoint &r = points.at(i);
 		if (circ.contains(r))
 			continue;
-		
+
 		// Form a circumcircle and classify it on left or right side
 		double cross = pq.cross(r - p);
 		Circle c = dm::makeCircumcircle(p, q, r);
@@ -116,7 +116,7 @@ static Circle makeSmallestEnclosingCircleTwoPoints(const vector<CCPoint> &points
 		else if (cross < 0 && (right.r < 0 || pq.cross(c.c - p) < pq.cross(right.c - p)))
 			right = c;
 	}
-	
+
 	// Select which circle to return
 	if (left.r < 0 && right.r < 0)
 		return circ;
