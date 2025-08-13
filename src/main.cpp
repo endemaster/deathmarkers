@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "shared.hpp"
 #include "submitter.hpp"
+#include "lib/sha1.hpp"
 
 using namespace geode::prelude;
 using namespace dm;
@@ -456,16 +457,24 @@ class $modify(DMPlayLayer, PlayLayer) {
 		myjson.set("levelversion", matjson::Value(
 			this->m_level->m_levelVersion
 		));
-		myjson.set("playername", matjson::Value(
-			this->m_fields->m_playerProps.username
-		));
-		myjson.set("userid", matjson::Value(this->m_fields->m_playerProps.userid));
 		myjson.set("format", matjson::Value(FORMAT_VERSION));
 
+		// Create Userident
+		std::string source = fmt::format("{}_{}_{}",
+			this->m_fields->m_playerProps.username,
+			this->m_fields->m_playerProps.userid,
+			this->m_level->m_levelID.value()
+		);
+		SHA1 sha1{};
+		sha1.update(source);
+		std::string hashed = sha1.final();
+		myjson.set("userident", matjson::Value(hashed));
+
+		// Create deaths array
 		auto deathList = matjson::Value(vector<matjson::Value>());
-		for (int i = 0; i < this->m_fields->m_submissions.size(); i++) {
+		for (auto i : this->m_fields->m_submissions) {
 			auto obj = matjson::Value();
-			this->m_fields->m_submissions[i].addToJSON(&obj);
+			i.addToJSON(&obj);
 			deathList.push(obj);
 		}
 		myjson.set("deaths", deathList);
