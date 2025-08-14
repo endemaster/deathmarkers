@@ -229,11 +229,17 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void renderMarkers(const vector<DeathLocationMin>::iterator begin,
-		const vector<DeathLocationMin>::iterator end, bool animate) {
+	void renderMarkers(vector<DeathLocationMin>::iterator begin,
+		vector<DeathLocationMin>::iterator end, bool animate) {
+
+		if (end == this->m_fields->m_deaths.end()) {
+			if (begin == end) return; // Nothing to draw
+			// Prevent crash
+			--end;
+		}
 
 		double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
-		for (auto deathLoc = begin; deathLoc < end; deathLoc++) {
+		for (auto deathLoc = begin; deathLoc <= end; ++deathLoc) {
 			CCNode* node;
 			if (animate) node = deathLoc->createAnimatedNode(
 				deathLoc == this->m_fields->m_latest,
