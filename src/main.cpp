@@ -332,10 +332,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void renderMarkersInFrame(bool animate) {
-
-		auto begin = this->m_fields->m_deaths.begin();
-		auto end = this->m_fields->m_deaths.end();
+	void findDeathRangeInFrame(
+		vector<DeathLocationMin>::iterator& begin,
+		vector<DeathLocationMin>::iterator& end, float lenience = 0.0f) {
 
 		// For all this jargon, see the "Screen Limit" slide in docs/doc.dio
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -346,9 +345,19 @@ class $modify(DMPlayLayer, PlayLayer) {
 		// log::debug("{} {}", halfWinWidth, winDiagonal);
 
 		begin = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth - winDiagonal);
+			halfWinWidth - winDiagonal + min(lenience, 0.0f));
 		end = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth + winDiagonal);
+			halfWinWidth + winDiagonal + max(lenience, 0.0f));
+
+	}
+
+	void renderMarkersInFrame(bool animate) {
+
+		auto begin = this->m_fields->m_deaths.begin();
+		auto end = this->m_fields->m_deaths.end();
+
+		findDeathRangeInFrame(begin, end);
+		log::debug("IN FRAME: from {} to {}", begin - this->m_fields->m_deaths.begin(), end - this->m_fields->m_deaths.begin());
 
 		renderMarkers(begin, end, animate);
 
