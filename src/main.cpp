@@ -21,27 +21,51 @@ enum DMEvent {
 	RESUME,
 };
 
+enum DMDrawScope {
+	// Nothing should be drawn
+	NONE,
+	// Markers on screen should be drawn
+	LOCAL,
+	// All markers should be drawn
+	GLOBAL
+};
+
 #include <Geode/modify/PlayLayer.hpp>
 class $modify(DMPlayLayer, PlayLayer) {
 
 	struct Fields {
+		// WebRequest response listener for death listing
 		EventListener<web::WebTask> m_listener;
 
+		// Node holding all marker nodes
 		CCNode* m_dmNode = CCNode::create();
+		// Node on the progress bar holding its chart
 		CCDrawNode* m_chartNode = nullptr;
 
-		bool m_drawn = false;
+		// Current visibility of markers
+		DMDrawScope m_drawn = NONE;
+		// false if the level or settings will never result in markers being shown
 		bool m_willEverDraw = true;
-		vector<DeathLocationMin> m_deaths;
-		vector<DeathLocationOut> m_submissions;
-		vector<DeathLocationMin>::iterator m_latest;
 
+		// List of deaths
+		vector<DeathLocationMin> m_deaths;
+		// Iterator to an entry in m_deaths pointing to the death that was last added
+		vector<DeathLocationMin>::iterator m_latest;
+		// List of pending submissions, used to send on level exit
+		vector<DeathLocationOut> m_submissions;
+
+		// True if m_chartNode is attached, false if it is yet to
 		bool m_chartAttached = false;
+		// Whether m_deaths has been populated with online deaths
 		bool m_fetched = false;
+		// Holds player properties for submission
 		struct playerData m_playerProps;
+		// Holds level properties for submission
 		struct playingLevel m_levelProps;
 
+		// Whether user settings signify local deaths should be used for this level
 		bool m_useLocal = false;
+		// Whether user settings signify only normal mode deaths should be shown
 		bool m_normalOnly = false;
 	};
 
@@ -370,12 +394,13 @@ class $modify(DMPlayLayer, PlayLayer) {
 	}
 
 	// Provides a central, consistent way to handle drawing state
-	bool shouldDraw() {
-		auto mod = Mod::get();
-		if (!this->m_fields->m_willEverDraw) return false;
+	DMDrawScope shouldDraw() {
 
+		if (!this->m_fields->m_willEverDraw) return NONE;
+		
+		auto mod = Mod::get();
 		auto pauseSetting = mod->getSettingValue<bool>("show-in-pause");
-		if (pauseSetting && this->m_isPaused) return true;
+		if (pauseSetting && this->m_isPaused) return LOCAL;
 
 		bool isPractice = this->m_fields->m_levelProps.practice ||
 			this->m_fields->m_levelProps.testmode;
@@ -383,23 +408,24 @@ class $modify(DMPlayLayer, PlayLayer) {
 		// Relevant condition setting for current mode
 		auto condSetting = mod->getSettingValue<std::string>(settName);
 
-		if (condSetting == "Always") return true;
-		if (condSetting == "Never") return false;
-		if (!this->m_player1->m_isDead && !this->m_player2->m_isDead) return false;
+		if (condSetting == "Always") return GLOBAL;
+		if (condSetting == "Never") return NONE;
+		// Remainder: On Death
+		if (!this->m_player1->m_isDead && !this->m_player2->m_isDead) return NONE;
 
-		if (!mod->getSettingValue<bool>("newbest-only")) return true;
-		if (this->m_fields->m_levelProps.platformer) return true;
+		if (!mod->getSettingValue<bool>("newbest-only")) return LOCAL;
+		if (this->m_fields->m_levelProps.platformer) return LOCAL;
 
 		int best = isPractice ?
 			this->m_level->m_practicePercent :
 			this->m_level->m_normalPercent.value();
-		if (best == 100 || getCurrentPercentInt() >= best) return true;
-		return false;
+		if (best == 100 || getCurrentPercentInt() >= best) return LOCAL;
+		return NONE;
 
 	}
 
 	void checkDraw(DMEvent event) {
-		bool should = this->shouldDraw();
+		DMDrawScope should = this->shouldDraw();
 
 		if (!this->m_fields->m_fetched) {
 			log::debug("Deaths not fetched, deferring...");
@@ -408,28 +434,33 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 		if (should != this->m_fields->m_drawn) {
 			log::debug("Toggling...");
-			this->m_fields->m_drawn = should;
 
-			if (should) {
-				renderHistogram();
-				switch (event) {
-					case LEVEL_LOAD:
-					case TOGGLE_PRACTICE:
-					case RESUME:
-						renderMarkers(
-							this->m_fields->m_deaths.begin(),
-							this->m_fields->m_deaths.end(),
-							true
-						);
-						break;
-					default:
+			switch (should) {
+				case NONE:
+					clearMarkers();
+					break;
+				case LOCAL:
+					renderHistogram();
+					if (this->m_fields->m_drawn == NONE) {
 						renderMarkersInFrame(event != PAUSE);
 						// iterator equivalent of nullptr
 						this->m_fields->m_latest = this->m_fields->m_deaths.end();
-				}
-			} else {
-				clearMarkers();
+					} else
+						// Markers are already globally rendered, so do not rerender
+						// Override `should` to prevent rerendering when switching to GLOBAL
+						should = GLOBAL;
+					break;
+				case GLOBAL:
+					renderHistogram();
+					if (this->m_fields->m_drawn == LOCAL) clearMarkers();
+					renderMarkers(
+						this->m_fields->m_deaths.begin(),
+						this->m_fields->m_deaths.end(),
+						true
+					);
+					break;
 			}
+			this->m_fields->m_drawn = should;
 		} else if (event == DEATH && should) {
 			// = markers are not redrawn, but new one should appear
 
@@ -441,6 +472,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			updateMarkers(0.0f);
 
 			this->m_fields->m_latest = this->m_fields->m_deaths.end();
+			renderHistogram();
 		} else if (event == RESET && should) {
 			// = markers are not redrawn, but last one should shrink
 
