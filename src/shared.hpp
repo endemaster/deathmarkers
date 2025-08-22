@@ -44,10 +44,29 @@ namespace dm {
 		DeathLocationMin(CCPoint pos);
 
 		CCNode* createNode(bool isCurrent) const;
-		CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
-		CCNode* createNode(bool isCurrent, bool preAnim) const;
+		virtual CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
+		virtual CCNode* createNode(bool isCurrent, bool preAnim) const;
 
 		bool operator<(const DeathLocationMin& other) const;
+	};
+
+	// Dynamic replacement for DeathLocationMin when using Ghost Cubes
+	// Stores additional needed information and overrides rendering
+	class GhostLocation : public DeathLocationMin {
+	public:
+		float rotation;
+		GameObjectType mode;
+		bool isPlayer2;
+		bool isMini;
+		bool isFlipped;
+		bool isMirrored;
+
+		GhostLocation(PlayerObject* player);
+		GhostLocation(float x, float y);
+		GhostLocation(float x, float y, int percentage);
+		
+		virtual CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
+		virtual CCNode* createNode(bool isCurrent, bool preAnim) const;
 	};
 
 	// Holds all information about a death location that can be sent to the server

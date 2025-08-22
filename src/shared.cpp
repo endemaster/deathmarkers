@@ -8,7 +8,7 @@ DeathLocationMin::DeathLocationMin(float x, float y, int percentage) {
 }
 
 DeathLocationMin::DeathLocationMin(CCPoint pos, int percentage) {
-	this->pos = CCPoint(pos);
+	this->pos = pos;
 	this->percentage = percentage;
 }
 
@@ -18,7 +18,7 @@ DeathLocationMin::DeathLocationMin(float x, float y) {
 }
 
 DeathLocationMin::DeathLocationMin(CCPoint pos) {
-	this->pos = CCPoint(pos);
+	this->pos = pos;
 	this->percentage = 0;
 }
 
@@ -65,6 +65,56 @@ CCNode* DeathLocationMin::createNode(bool isCurrent, bool preAnim) const {
 bool DeathLocationMin::operator<(const DeathLocationMin& other) const {
 	return (this->pos.x < other.pos.x);
 };
+
+
+GhostLocation::GhostLocation(PlayerObject* player) :
+	DeathLocationMin(player->getPosition()) {
+	this->isPlayer2 = player->m_isSecondPlayer;
+	this->mode = player->getActiveMode();
+	this->isMini = false; // TODO
+	this->isFlipped = player->m_stateFlipGravity;
+	this->isMirrored = false; // TODO
+}
+
+GhostLocation::GhostLocation(float x, float y) :
+	DeathLocationMin(x, y) {};
+
+GhostLocation::GhostLocation(float x, float y, int percentage) :
+	DeathLocationMin(x, y, percentage) {};
+
+CCNode* GhostLocation::createAnimatedNode(
+	bool isCurrent, double delay, double fadeTime) const {
+	auto node = this->createNode(isCurrent, true);
+	if (delay || fadeTime)
+		node->runAction(CCSequence::createWithTwoActions(
+			CCDelayTime::create(delay),
+			CCSpawn::createWithTwoActions(
+				CCEaseBounceOut::create(
+					CCScaleTo::create(fadeTime, 1)
+				),
+				CCFadeIn::create(fadeTime)
+			)
+		));
+	return node;
+}
+
+CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
+	auto sprite = CCSprite::create("death-marker.png"_spr);
+	std::string const id = "marker"_spr;
+	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
+
+	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
+
+	if (preAnim) {
+		sprite->setScale(.5);
+		sprite->setOpacity(0);
+	}
+	else {
+		sprite->setPosition(this->pos);
+	}
+	sprite->setAnchorPoint({ 0.5f, 0.5f });
+	return sprite;
+}
 
 
 DeathLocationOut::DeathLocationOut(float x, float y) :
