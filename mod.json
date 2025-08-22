@@ -89,9 +89,7 @@
 		"use-ghost-cube": {
 			"type": "bool",
 			"name": "Show as Ghost Cube",
-			"description": "Displays local deaths as ghost players. <cr>Requires more data to be stored, does not work retroactively</c>",
-			"enable-if": "store-local-2 != 'Never'",
-			"enable-if-description": "Ghost Cubes only work if local deaths are used",
+			"description": "Displays local deaths as ghost players. <cr>Requires more data to be stored, does not work retroactively.</c> <co>Only works if local deaths are used.</c>",
 			"default": false
 		},
 		"prog-bar-hist-height": {
