@@ -4,11 +4,13 @@
 but also for <cg>in-depth analysis of gameplay</c>.
 
 **Features:**
+
 - Show <cy>other players' deaths</c> when you die
 - Analyze player deaths in your levels
 - Help creators <cg>improve</c> their levels
 
 **Planned Features:** (who knows if these ever get done lmao)
+
 - Built-in analysis <cg>helper tools</c>
 - (minimal) Player path tracing
 
@@ -17,10 +19,6 @@ but also for <cg>in-depth analysis of gameplay</c>.
 If you wish to use the mod to record your death locations to learn your weak points in a level, you can enable the "Show only local deaths" setting. That way, your deaths are also stored locally and markers are only loaded from there.
 
 If you don't need the locally stored markers anymore, you can head to this mod's data directory and delete the file corresponding to the ID of the level you want to clean.
-
-## What is this "Spam Warning"?
-
-Since we cannot have nice things on this world, I have to protect my server from spammers. This means casual players may, too, get a notice that they have broken the rate limit. If you are playing, e.g. a demon, and are dying rapidly (in which case the mod is not intended for this anyway), feel free to disable sending deaths, and use local deaths instead, which gets rid of the spam warning popup.
 
 ## Disclaimer
 

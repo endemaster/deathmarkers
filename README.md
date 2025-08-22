@@ -1,10 +1,8 @@
-# DeathMarkers
-
-<img src="./logo.png" width="200">
+<center><h1><img src="./logo.png" width="120" style="vertical-align: -100%"> DeathMarkers</h1>
 
 **Online death collection**, not only for fun Mario Maker-style Death Markers, but also for in-depth analysis of gameplay.
 
-### » [View Guide](https://deathmarkers.masp005.dev) ⫶ [Install on Geode](https://geode-sdk.org/mods/freakyrobot.deathmarkers) ⫶ [Join the Discord](https://discord.gg/hzDFNaNgCf) «
+### » [View Guide](https://deathmarkers.masp005.dev) ⫶ [Install on Geode](https://geode-sdk.org/mods/freakyrobot.deathmarkers) ⫶ [Join the Discord](https://discord.gg/hzDFNaNgCf) «</center>
 
 ## Installation
 
