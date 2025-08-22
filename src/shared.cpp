@@ -75,10 +75,43 @@ void DeathLocationMin::printCSV(ostream& os, bool hasPercentage) const {
 GhostLocation::GhostLocation(PlayerObject* player) :
 	DeathLocationMin(player->getPosition()) {
 	this->isPlayer2 = player->m_isSecondPlayer;
-	this->mode = player->getActiveMode();
 	this->isMini = false; // TODO
-	this->isFlipped = player->m_stateFlipGravity;
+	this->isFlipped = player->m_stateFlipGravity; // TODO
 	this->isMirrored = false; // TODO
+	// TODO: Cube on ship, jetpack & ufo
+	// TODO: positioning
+	// TODO: grayscale
+
+	switch (player->getActiveMode()) {
+    case GameObjectType::ShipPortal:
+			this->mode = player->m_isPlatformer ? IconType::Jetpack : IconType::Ship;
+			break;
+    case GameObjectType::BallPortal:
+			this->mode = IconType::Ball;
+			break;
+    case GameObjectType::UfoPortal:
+			this->mode = IconType::Ufo;
+			break;
+    case GameObjectType::WavePortal:
+			this->mode = IconType::Wave;
+			break;
+    case GameObjectType::RobotPortal:
+			this->mode = IconType::Robot;
+			break;
+    case GameObjectType::SpiderPortal:
+			this->mode = IconType::Spider;
+			break;
+    case GameObjectType::SwingPortal:
+			this->mode = IconType::Swing;
+			break;
+		default:
+    case GameObjectType::CubePortal:
+			this->mode = IconType::Cube;
+			break;
+	}
+
+	log::debug("p2 {} mini {} flip {} mirror {} mode {}", this->isPlayer2,
+		this->isMini, this->isFlipped, this->isMirrored, static_cast<int>(this->mode));
 }
 
 GhostLocation::GhostLocation(float x, float y) :
@@ -97,18 +130,48 @@ CCNode* GhostLocation::createAnimatedNode(
 				CCEaseBounceOut::create(
 					CCScaleTo::create(fadeTime, 1)
 				),
-				CCFadeIn::create(fadeTime)
+				CCFadeTo::create(fadeTime, 0xff >> 1)
 			)
 		));
 	return node;
 }
 
 CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
-	auto sprite = CCSprite::create("death-marker.png"_spr);
 	std::string const id = "marker"_spr;
 	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
+	auto gm = GameManager::sharedState();
 
-	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
+	int frameIcon;
+	switch (this->mode) {
+		case IconType::Ship: frameIcon = gm->getPlayerShip(); break;
+		case IconType::Ball: frameIcon = gm->getPlayerBall(); break;
+		case IconType::Ufo: frameIcon = gm->getPlayerBird(); break;
+		case IconType::Wave: frameIcon = gm->getPlayerDart(); break;
+		case IconType::Robot: frameIcon = gm->getPlayerRobot(); break;
+		case IconType::Spider: frameIcon = gm->getPlayerSpider(); break;
+		case IconType::Swing: frameIcon = gm->getPlayerSwing(); break;
+		case IconType::Jetpack: frameIcon = gm->getPlayerJetpack(); break;
+		default: frameIcon = gm->getPlayerFrame();
+	}
+
+	auto col1 = gm->getPlayerColor();
+	auto col2 = gm->getPlayerColor2();
+	auto glowOutline = gm->colorForIdx(gm->getPlayerGlowColor());
+	if (this->isPlayer2) std::swap(col1, col2);
+
+	SimplePlayer* sprite = SimplePlayer::create(0);
+	sprite->updatePlayerFrame(frameIcon, this->mode);
+	sprite->setColor(gm->colorForIdx(col1));
+	sprite->setSecondColor(gm->colorForIdx(col2));
+	sprite->setGlowOutline(glowOutline);
+	sprite->enableCustomGlowColor(glowOutline);
+	if (!gm->getPlayerGlow())
+		sprite->disableGlowOutline();
+
+	sprite->setRotation(this->rotation);
+	if (this->isFlipped) sprite->m_fScaleY *= -1.f;
+	if (this->isMirrored) sprite->m_fScaleY *= -1.f;
+	// TODO: isMini
 
 	if (preAnim) {
 		sprite->setScale(.5);
@@ -117,6 +180,7 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	else {
 		sprite->setPosition(this->pos);
 	}
+	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
 	sprite->setAnchorPoint({ 0.5f, 0.5f });
 	return sprite;
 }
@@ -128,10 +192,10 @@ void GhostLocation::printCSV(ostream& os, bool hasPercentage) const {
 	flagField |= (this->isFlipped * 4);
 	flagField |= (this->isMirrored * 8);
 
-	os << this->pos.x << ',' << this->pos.y;
+	os << this->pos.x << ',' << this->pos.y
+		 << ',' << this->rotation << ',' << static_cast<int>(this->mode) << ','
+		 << static_cast<int>(flagField);
 	if (hasPercentage) os << ',' << this->percentage;
-	os << ',' << this->rotation << ',' << static_cast<int>(this->mode) << ','
-		 << flagField;
 };
 
 
@@ -283,7 +347,7 @@ std::optional<unique_ptr<DeathLocationMin>> readCSVLine(
 
 	// If applicable, extract and interpret percentage
 	if (hasPercentage) {
-		auto const& percentStr = coords.at(2);
+		auto const& percentStr = coords.at(isGhost ? 5 : 2);
 		try {
 			percent = stoi(percentStr);
 		} catch (invalid_argument) {
@@ -299,15 +363,15 @@ std::optional<unique_ptr<DeathLocationMin>> readCSVLine(
 		auto ghostLoc = make_unique<GhostLocation>(GhostLocation(x, y, percent));
 
 		float rotation;
-		GameObjectType mode;
+		IconType mode;
 		uint8_t flagField;
-		auto const& rotStr = coords.at(2 + hasPercentage);
-		auto const& modeStr = coords.at(3 + hasPercentage);
-		auto const& flagStr = coords.at(4 + hasPercentage);
+		auto const& rotStr = coords.at(2);
+		auto const& modeStr = coords.at(3);
+		auto const& flagStr = coords.at(4);
 
 		try {
 			rotation = stof(rotStr);
-			mode = static_cast<GameObjectType>(stof(modeStr));
+			mode = static_cast<IconType>(stof(modeStr));
 			flagField = stoi(flagStr);
 		} catch (invalid_argument) {
 			log::warn("Unexpected Non-Number coordinate listing deaths: {}", coords);
@@ -354,6 +418,7 @@ vector<unique_ptr<DeathLocationMin>> dm::getLocalDeaths(int levelId, bool hasPer
 	auto deathLoc = readCSVLine(buffer, hasPercentage);
 	if (deathLoc.has_value()) deaths.push_back(std::move(*deathLoc));
 	stream.close();
+	std::sort(deaths.begin(), deaths.end());
 	return deaths;
 }
 

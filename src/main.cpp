@@ -589,8 +589,14 @@ class $modify(DMPlayerObject, PlayerObject) {
 				playLayer->m_fields->m_deaths.end(),
 				deathLoc->pos.x
 			);
+
+			unique_ptr<DeathLocationMin> toShow;
+			if (Mod::get()->getSettingValue<bool>("use-ghost-cube"))
+				toShow = std::make_unique<GhostLocation>(GhostLocation(this));
+			else toShow = std::move(deathLoc);
+
 			playLayer->m_fields->m_latest =
-				playLayer->m_fields->m_deaths.insert(nearest, std::move(deathLoc));
+				playLayer->m_fields->m_deaths.insert(nearest, std::move(toShow));
 		}
 		playLayer->checkDraw(DEATH);
 

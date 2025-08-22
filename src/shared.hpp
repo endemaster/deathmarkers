@@ -56,7 +56,7 @@ namespace dm {
 	class GhostLocation : public DeathLocationMin {
 	public:
 		float rotation;
-		GameObjectType mode;
+		IconType mode;
 		bool isPlayer2;
 		bool isMini;
 		bool isFlipped;
