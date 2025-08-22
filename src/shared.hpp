@@ -46,6 +46,7 @@ namespace dm {
 		CCNode* createNode(bool isCurrent) const;
 		virtual CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
 		virtual CCNode* createNode(bool isCurrent, bool preAnim) const;
+		virtual void printCSV(ostream& os, bool hasPercentage) const;
 
 		bool operator<(const DeathLocationMin& other) const;
 	};
@@ -65,8 +66,10 @@ namespace dm {
 		GhostLocation(float x, float y);
 		GhostLocation(float x, float y, int percentage);
 		
-		virtual CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
-		virtual CCNode* createNode(bool isCurrent, bool preAnim) const;
+		CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime)
+			const override;
+		CCNode* createNode(bool isCurrent, bool preAnim) const override;
+		void printCSV(ostream& os, bool hasPercentage) const override;
 	};
 
 	// Holds all information about a death location that can be sent to the server
@@ -115,24 +118,25 @@ namespace dm {
 
 	std::string makeRequestURL(char const* endpoint);
 
-	vector<DeathLocationMin> getLocalDeaths(int levelId, bool hasPercentage);
-	void storeLocalDeaths(int levelId, vector<DeathLocationMin>& deaths,
+	vector<unique_ptr<DeathLocationMin>> getLocalDeaths(int levelId,
 		bool hasPercentage);
+	void storeLocalDeaths(int levelId,
+		vector<unique_ptr<DeathLocationMin>> const& deaths, bool hasPercentage);
 
 	void parseBinDeathList(web::WebResponse* res,
-		vector<DeathLocationMin>* target, bool hasPercentage);
+		vector<unique_ptr<DeathLocationMin>>* target, bool hasPercentage);
 	void parseBinDeathList(web::WebResponse* res,
 		vector<DeathLocation>* target);
 
 	vector<std::string> split(const std::string& string, const char at);
 
-	vector<DeathLocationMin>::iterator binarySearchNearestXPosOnScreen(
-		vector<DeathLocationMin>::iterator from,
-		vector<DeathLocationMin>::iterator to, CCLayer* parent, float x);
+	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPosOnScreen(
+		vector<unique_ptr<DeathLocationMin>>::iterator from,
+		vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x);
 
-	vector<DeathLocationMin>::iterator binarySearchNearestXPos(
-		vector<DeathLocationMin>::iterator from,
-		vector<DeathLocationMin>::iterator to, float x);
+	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPos(
+		vector<unique_ptr<DeathLocationMin>>::iterator from,
+		vector<unique_ptr<DeathLocationMin>>::iterator to, float x);
 
 }
 

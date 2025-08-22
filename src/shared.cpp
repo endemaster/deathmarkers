@@ -66,6 +66,11 @@ bool DeathLocationMin::operator<(const DeathLocationMin& other) const {
 	return (this->pos.x < other.pos.x);
 };
 
+void DeathLocationMin::printCSV(ostream& os, bool hasPercentage) const {
+	os << this->pos.x << ',' << this->pos.y;
+	if (hasPercentage) os << ',' << this->percentage;
+};
+
 
 GhostLocation::GhostLocation(PlayerObject* player) :
 	DeathLocationMin(player->getPosition()) {
@@ -115,6 +120,19 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	sprite->setAnchorPoint({ 0.5f, 0.5f });
 	return sprite;
 }
+
+void GhostLocation::printCSV(ostream& os, bool hasPercentage) const {
+	uint8_t flagField;
+	flagField |= (this->isPlayer2 * 1);
+	flagField |= (this->isMini * 2);
+	flagField |= (this->isFlipped * 4);
+	flagField |= (this->isMirrored * 8);
+
+	os << this->pos.x << ',' << this->pos.y;
+	if (hasPercentage) os << ',' << this->percentage;
+	os << ',' << this->rotation << ',' << static_cast<int>(this->mode) << ','
+		 << flagField;
+};
 
 
 DeathLocationOut::DeathLocationOut(float x, float y) :
@@ -232,7 +250,8 @@ std::string uint8_to_hex_string(const uint8_t *v, const size_t s) {
 }
 
 
-std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercentage) {
+std::optional<unique_ptr<DeathLocationMin>> readCSVLine(
+	std::string const& buffer, bool hasPercentage) {
 	if (buffer.empty()) return std::nullopt;
 
 	vector<std::string> coords = split(buffer, ',');
@@ -289,7 +308,7 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 		try {
 			rotation = stof(rotStr);
 			mode = static_cast<GameObjectType>(stof(modeStr));
-			flagField = stof(flagStr);
+			flagField = stoi(flagStr);
 		} catch (invalid_argument) {
 			log::warn("Unexpected Non-Number coordinate listing deaths: {}", coords);
 			return std::nullopt;
@@ -302,21 +321,19 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 		ghostLoc->isFlipped = flagField & 4;
 		ghostLoc->isMirrored = flagField & 8;
 
-		// return std::optional<unique_ptr<DeathLocationMin>>(std::move(ghostLoc));
-		return std::optional<DeathLocationMin>(ghostLoc);
+		return std::optional<unique_ptr<DeathLocationMin>>(std::move(ghostLoc));
 	} else {
-		auto ghostLoc = make_unique<DeathLocationMin>(
+		auto deathLoc = make_unique<DeathLocationMin>(
 			DeathLocationMin(x, y, percent)
 		);
 
-		// return std::optional<unique_ptr<DeathLocationMin>>(std::move(ghostLoc));
-		return std::optional<DeathLocationMin>(ghostLoc);
+		return std::optional<unique_ptr<DeathLocationMin>>(std::move(deathLoc));
 	}
 }
 
-vector<DeathLocationMin> dm::getLocalDeaths(int levelId, bool hasPercentage) {
+vector<unique_ptr<DeathLocationMin>> dm::getLocalDeaths(int levelId, bool hasPercentage) {
 	filesystem::path filePath = Mod::get()->getSaveDir() / numToString(levelId);
-	vector<DeathLocationMin> deaths;
+	vector<unique_ptr<DeathLocationMin>> deaths;
 	if (!filesystem::exists(filePath)) {
 		log::debug("No file found at {}.", filePath);
 		return deaths;
@@ -329,32 +346,31 @@ vector<DeathLocationMin> dm::getLocalDeaths(int levelId, bool hasPercentage) {
 		if (single == '\n') {
 			// Process and clear buffer
 			auto deathLoc = readCSVLine(buffer, hasPercentage);
-			if (deathLoc.has_value()) deaths.push_back(deathLoc.value());
-
 			buffer = "";
+			if (!deathLoc.has_value()) continue;
+			deaths.push_back(std::move(*deathLoc));
 		} else buffer += single;
 	}
 	auto deathLoc = readCSVLine(buffer, hasPercentage);
-	if (deathLoc.has_value()) deaths.push_back(deathLoc.value());
+	if (deathLoc.has_value()) deaths.push_back(std::move(*deathLoc));
 	stream.close();
 	return deaths;
 }
 
-void dm::storeLocalDeaths(int levelId, vector<DeathLocationMin>& deaths,
-	bool hasPercentage) {
+void dm::storeLocalDeaths(int levelId,
+	vector<unique_ptr<DeathLocationMin>> const& deaths, bool hasPercentage) {
 	filesystem::path filePath = Mod::get()->getSaveDir() / numToString(levelId);
 
 	auto stream = ofstream(filePath);
-	for (auto i = deaths.begin(); i < deaths.end(); i++) {
-		stream << i->pos.x << "," << i->pos.y;
-		if (hasPercentage) stream << "," << i->percentage;
-		stream << "\n";
+	for (auto& i : deaths) {
+		i->printCSV(stream, hasPercentage);
+		stream << endl;
 	}
 };
 
 
 void dm::parseBinDeathList(web::WebResponse* res,
-	vector<DeathLocationMin>* target, bool hasPercentage) {
+	vector<unique_ptr<DeathLocationMin>>* target, bool hasPercentage) {
 
 	auto const body = res->data();
 	int const elementWidth = 4 + 4 + (hasPercentage ? 2 : 0);
@@ -391,9 +407,10 @@ void dm::parseBinDeathList(web::WebResponse* res,
 
 		std::memcpy(stencil.raw, body.data() + off, elementWidth);
 
-		auto deathLoc = DeathLocationMin(stencil.obj.x, stencil.obj.y);
-		deathLoc.percentage = stencil.obj.perc;
-		target->push_back(deathLoc);
+		auto deathLoc = std::make_unique<DeathLocationMin>
+			(DeathLocationMin(stencil.obj.x, stencil.obj.y));
+		deathLoc->percentage = stencil.obj.perc;
+		target->push_back(std::move(deathLoc));
 	}
 
 }
@@ -472,15 +489,15 @@ vector<std::string> dm::split(const std::string& string, const char at) {
 }
 
 
-vector<DeathLocationMin>::iterator dm::binarySearchNearestXPosOnScreen(
-	vector<DeathLocationMin>::iterator from,
-	vector<DeathLocationMin>::iterator to, CCLayer* parent, float x) {
+vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPosOnScreen(
+	vector<unique_ptr<DeathLocationMin>>::iterator from,
+	vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x) {
 
 	if (to - from <= 1) return from;
 
 	auto middle = from + ((to - from) >> 1);
 
-	auto dist = parent->convertToWorldSpace(middle->pos).x;
+	auto dist = parent->convertToWorldSpace((*middle)->pos).x;
 	if (dist > x) to = middle;
 	else from = middle;
 
@@ -488,15 +505,15 @@ vector<DeathLocationMin>::iterator dm::binarySearchNearestXPosOnScreen(
 
 }
 
-vector<DeathLocationMin>::iterator dm::binarySearchNearestXPos(
-	vector<DeathLocationMin>::iterator from,
-	vector<DeathLocationMin>::iterator to, float x) {
+vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPos(
+	vector<unique_ptr<DeathLocationMin>>::iterator from,
+	vector<unique_ptr<DeathLocationMin>>::iterator to, float x) {
 
 	if (to - from <= 1) return from;
 
 	auto middle = from + ((to - from) >> 1);
 
-	if (middle->pos.x > x) to = middle;
+	if ((*middle)->pos.x > x) to = middle;
 	else from = middle;
 
 	return binarySearchNearestXPos(from, to, x);
