@@ -236,9 +236,11 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 	if (buffer.empty()) return std::nullopt;
 
 	vector<std::string> coords = split(buffer, ',');
-	if (coords.size() != (hasPercentage ? 3 : 2)) {
+	bool isGhost = coords.size() > 3;
+	int expect = (hasPercentage ? 3 : 2) + (isGhost * 3);
+	if (coords.size() != expect) {
 		log::warn(
-			"Error listing deaths: Invalid number of elements: {} ({})",
+			"Error listing deaths: Unexpected number of elements: {} ({})",
 			coords, hasPercentage
 		);
 		return std::nullopt;
@@ -247,6 +249,7 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 	// Reserve variables, extract strings
 	float x;
 	float y;
+	int percent;
 	auto const& xStr = coords.at(0);
 	auto const& yStr = coords.at(1);
 
@@ -259,11 +262,8 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 		return std::nullopt;
 	}
 
-	auto deathLoc = DeathLocationMin(x, y);
-
 	// If applicable, extract and interpret percentage
 	if (hasPercentage) {
-		int percent;
 		auto const& percentStr = coords.at(2);
 		try {
 			percent = stoi(percentStr);
@@ -274,10 +274,44 @@ std::optional<DeathLocationMin> readCSVLine(std::string buffer, bool hasPercenta
 			);
 			return std::nullopt;
 		}
-		deathLoc.percentage = percent;
 	}
 
-	return std::optional<DeathLocationMin>(deathLoc);
+	if (isGhost) {
+		auto ghostLoc = make_unique<GhostLocation>(GhostLocation(x, y, percent));
+
+		float rotation;
+		GameObjectType mode;
+		uint8_t flagField;
+		auto const& rotStr = coords.at(2 + hasPercentage);
+		auto const& modeStr = coords.at(3 + hasPercentage);
+		auto const& flagStr = coords.at(4 + hasPercentage);
+
+		try {
+			rotation = stof(rotStr);
+			mode = static_cast<GameObjectType>(stof(modeStr));
+			flagField = stof(flagStr);
+		} catch (invalid_argument) {
+			log::warn("Unexpected Non-Number coordinate listing deaths: {}", coords);
+			return std::nullopt;
+		}
+
+		ghostLoc->rotation = rotation;
+		ghostLoc->mode = mode;
+		ghostLoc->isPlayer2 = flagField & 1;
+		ghostLoc->isMini = flagField & 2;
+		ghostLoc->isFlipped = flagField & 4;
+		ghostLoc->isMirrored = flagField & 8;
+
+		// return std::optional<unique_ptr<DeathLocationMin>>(std::move(ghostLoc));
+		return std::optional<DeathLocationMin>(ghostLoc);
+	} else {
+		auto ghostLoc = make_unique<DeathLocationMin>(
+			DeathLocationMin(x, y, percent)
+		);
+
+		// return std::optional<unique_ptr<DeathLocationMin>>(std::move(ghostLoc));
+		return std::optional<DeathLocationMin>(ghostLoc);
+	}
 }
 
 vector<DeathLocationMin> dm::getLocalDeaths(int levelId, bool hasPercentage) {
