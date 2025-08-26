@@ -16,6 +16,9 @@ namespace dm {
 	
 	constexpr int CURRENT_ZORDER = 2 << 29;
 	constexpr int OTHER_ZORDER = (2 << 29) - 1;
+	constexpr float GS_WEIGHT_RED = 0.299;
+	constexpr float GS_WEIGHT_GREEN = 0.587;
+	constexpr float GS_WEIGHT_BLUE = 0.114;
 
 	struct playerData {
 		std::string username = "";
@@ -117,6 +120,7 @@ namespace dm {
 	bool willEverDraw(struct playingLevel& level);
 
 	std::string makeRequestURL(char const* endpoint);
+	ccColor3B grayscale(ccColor3B const& color);
 
 	vector<unique_ptr<DeathLocationMin>> getLocalDeaths(int levelId,
 		bool hasPercentage);

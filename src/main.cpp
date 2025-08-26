@@ -3,7 +3,6 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include <vector>
 #include <string>
-#include <stdio.h>
 #include <stdlib.h>
 #include "shared.hpp"
 #include "submitter.hpp"
@@ -289,8 +288,14 @@ class $modify(DMPlayLayer, PlayLayer) {
 			auto child = static_cast<CCNode*>(children->objectAtIndex(i));
 			bool isCurrent = child->getZOrder() == CURRENT_ZORDER;
 
-			child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
-			child->setRotation(-sceneRotation);
+			if (auto player = dynamic_cast<SimplePlayer*>(child)) {
+				// Ghost Marker
+				player->setOpacity((isCurrent ? 0xff : 0xff >> 1));
+			} else {
+				// Regular Marker
+				child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
+				child->setRotation(-sceneRotation);
+			}
 		}
 
 	}
@@ -591,9 +596,11 @@ class $modify(DMPlayerObject, PlayerObject) {
 			);
 
 			unique_ptr<DeathLocationMin> toShow;
-			if (Mod::get()->getSettingValue<bool>("use-ghost-cube"))
+			if (Mod::get()->getSettingValue<bool>("use-ghost-cube")){
 				toShow = std::make_unique<GhostLocation>(GhostLocation(this));
-			else toShow = std::move(deathLoc);
+				toShow->percentage = percent;
+			} else
+				toShow = std::move(deathLoc);
 
 			playLayer->m_fields->m_latest =
 				playLayer->m_fields->m_deaths.insert(nearest, std::move(toShow));

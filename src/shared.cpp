@@ -44,7 +44,6 @@ CCNode* DeathLocationMin::createAnimatedNode(
 
 CCNode* DeathLocationMin::createNode(bool isCurrent, bool preAnim) const {
 	auto sprite = CCSprite::create("death-marker.png"_spr);
-	std::string const id = "marker"_spr;
 	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
 
 	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
@@ -78,9 +77,6 @@ GhostLocation::GhostLocation(PlayerObject* player) :
 	this->isMini = false; // TODO
 	this->isFlipped = player->m_stateFlipGravity; // TODO
 	this->isMirrored = false; // TODO
-	// TODO: Cube on ship, jetpack & ufo
-	// TODO: positioning
-	// TODO: grayscale
 
 	switch (player->getActiveMode()) {
     case GameObjectType::ShipPortal:
@@ -137,9 +133,10 @@ CCNode* GhostLocation::createAnimatedNode(
 }
 
 CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
-	std::string const id = "marker"_spr;
-	float markerScale = Mod::get()->getSettingValue<float>("marker-scale");
 	auto gm = GameManager::sharedState();
+	// TODO: Cube on ship, jetpack & ufo (y+5, scale .55)
+	// TODO: grayscale
+	// TODO: fix rotation
 
 	int frameIcon;
 	switch (this->mode) {
@@ -161,9 +158,11 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 
 	SimplePlayer* sprite = SimplePlayer::create(0);
 	sprite->updatePlayerFrame(frameIcon, this->mode);
-	sprite->setColor(gm->colorForIdx(col1));
-	sprite->setSecondColor(gm->colorForIdx(col2));
-	sprite->setGlowOutline(glowOutline);
+	sprite->setColors(
+		grayscale(gm->colorForIdx(col1)),
+		grayscale(gm->colorForIdx(col2))
+	);
+	sprite->setGlowOutline(grayscale(glowOutline));
 	sprite->enableCustomGlowColor(glowOutline);
 	if (!gm->getPlayerGlow())
 		sprite->disableGlowOutline();
@@ -177,9 +176,8 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 		sprite->setScale(.5);
 		sprite->setOpacity(0);
 	}
-	else {
-		sprite->setPosition(this->pos);
-	}
+	sprite->setCascadeOpacityEnabled(true);
+	sprite->setPosition(this->pos);
 	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
 	sprite->setAnchorPoint({ 0.5f, 0.5f });
 	return sprite;
@@ -312,6 +310,12 @@ std::string uint8_to_hex_string(const uint8_t *v, const size_t s) {
 
   return ss.str();
 }
+
+ccColor3B dm::grayscale(ccColor3B const& color) {
+	auto brightness = static_cast<uint8_t>(color.r * GS_WEIGHT_RED +
+		color.r * GS_WEIGHT_RED + color.b * GS_WEIGHT_BLUE);
+	return {brightness, brightness, brightness};
+};
 
 
 std::optional<unique_ptr<DeathLocationMin>> readCSVLine(
@@ -452,7 +456,7 @@ void dm::parseBinDeathList(web::WebResponse* res,
 		return;
 	}
 	if ((body.size() - 1) % elementWidth) {
-		log::warn("{} exccess bytes, probably data misalignment! Skipping...",
+		log::warn("{} excess bytes, probably data misalignment! Skipping...",
 			(body.size() - 1) % elementWidth);
 		return;
 	}
@@ -498,7 +502,7 @@ void dm::parseBinDeathList(web::WebResponse* res,
 		return;
 	}
 	if ((body.size() - 1) % elementWidth) {
-		log::warn("{} exccess bytes, probably data misalignment! Skipping...",
+		log::warn("{} excess bytes, probably data misalignment! Skipping...",
 			(body.size() - 1) % elementWidth);
 		return;
 	}
