@@ -8,6 +8,7 @@ else()
 endif()
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+option(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(DeathMarkers VERSION 0.1.0)
 

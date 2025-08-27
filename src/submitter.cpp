@@ -26,7 +26,7 @@ void Submitter::event(web::WebTask::Event* e) {
 			if (code == 429) {
 				auto timeoutHeader = res->header("Retry-After");
 				auto timeout = timeoutHeader.has_value() ?
-					std::chrono::seconds(atoi(timeoutHeader.value().c_str())) :
+					std::chrono::seconds(atoi(timeoutHeader->c_str())) :
 					RETRY_TIMEOUT;
 
 				log::debug("Hit rate limit, using Retry-After header...");
