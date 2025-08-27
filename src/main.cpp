@@ -596,9 +596,12 @@ class $modify(DMPlayerObject, PlayerObject) {
 			);
 
 			unique_ptr<DeathLocationMin> toShow;
-			if (Mod::get()->getSettingValue<bool>("use-ghost-cube")){
-				toShow = std::make_unique<GhostLocation>(GhostLocation(this));
-				toShow->percentage = percent;
+			if (Mod::get()->getSettingValue<bool>("use-ghost-cube") &&
+				playLayer->m_fields->m_useLocal
+			) {
+				auto showGhost = std::make_unique<GhostLocation>(GhostLocation(this));
+				showGhost->percentage = percent;
+				toShow = std::move(showGhost);
 			} else
 				toShow = std::move(deathLoc);
 

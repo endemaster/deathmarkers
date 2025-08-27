@@ -74,9 +74,10 @@ void DeathLocationMin::printCSV(ostream& os, bool hasPercentage) const {
 GhostLocation::GhostLocation(PlayerObject* player) :
 	DeathLocationMin(player->getPosition()) {
 	this->isPlayer2 = player->m_isSecondPlayer;
-	this->isMini = false; // TODO
-	this->isFlipped = player->m_stateFlipGravity; // TODO
+	this->isMini = player->getScale() < 1.0f;
+	this->isFlipped = false; // TODO
 	this->isMirrored = false; // TODO
+	this->rotation = player->m_fRotationX;
 
 	switch (player->getActiveMode()) {
     case GameObjectType::ShipPortal:
@@ -106,8 +107,8 @@ GhostLocation::GhostLocation(PlayerObject* player) :
 			break;
 	}
 
-	log::debug("p2 {} mini {} flip {} mirror {} mode {}", this->isPlayer2,
-		this->isMini, this->isFlipped, this->isMirrored, static_cast<int>(this->mode));
+	log::debug("p2 {} mini {} flip {} mirror {} rot {} mode1 {} mode2 {}", this->isPlayer2,
+		this->isMini, this->isFlipped, this->isMirrored, this->rotation, static_cast<int>(player->getActiveMode()), static_cast<int>(this->mode));
 }
 
 GhostLocation::GhostLocation(float x, float y) :
@@ -134,9 +135,6 @@ CCNode* GhostLocation::createAnimatedNode(
 
 CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	auto gm = GameManager::sharedState();
-	// TODO: Cube on ship, jetpack & ufo (y+5, scale .55)
-	// TODO: grayscale
-	// TODO: fix rotation
 
 	int frameIcon;
 	switch (this->mode) {
@@ -156,6 +154,12 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	auto glowOutline = gm->colorForIdx(gm->getPlayerGlowColor());
 	if (this->isPlayer2) std::swap(col1, col2);
 
+	if (this->mode == IconType::Ship || this->mode == IconType::Ufo ||
+		this->mode == IconType::Jetpack
+	) {
+		// TODO: Mini Cube (y+5, scale .55)
+	}
+
 	SimplePlayer* sprite = SimplePlayer::create(0);
 	sprite->updatePlayerFrame(frameIcon, this->mode);
 	sprite->setColors(
@@ -170,7 +174,7 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	sprite->setRotation(this->rotation);
 	if (this->isFlipped) sprite->m_fScaleY *= -1.f;
 	if (this->isMirrored) sprite->m_fScaleY *= -1.f;
-	// TODO: isMini
+	if (this->isMini) sprite->setScale(0.5f);
 
 	if (preAnim) {
 		sprite->setScale(.5);
@@ -185,10 +189,10 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 
 void GhostLocation::printCSV(ostream& os, bool hasPercentage) const {
 	uint8_t flagField;
-	flagField |= (this->isPlayer2 * 1);
-	flagField |= (this->isMini * 2);
-	flagField |= (this->isFlipped * 4);
-	flagField |= (this->isMirrored * 8);
+	flagField |= (this->isPlayer2 << 0);
+	flagField |= (this->isMini << 1);
+	flagField |= (this->isFlipped << 2);
+	flagField |= (this->isMirrored << 3);
 
 	os << this->pos.x << ',' << this->pos.y
 		 << ',' << this->rotation << ',' << static_cast<int>(this->mode) << ','
