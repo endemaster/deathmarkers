@@ -114,7 +114,7 @@ CCNode* GhostLocation::createAnimatedNode(
 				CCEaseBounceOut::create(
 					CCScaleTo::create(fadeTime, isMini ? 0.6f : 1.0f)
 				),
-				CCFadeTo::create(fadeTime, 0xff >> 1)
+				CCFadeTo::create(fadeTime, 0xff / 2)
 			)
 		));
 	return node;
@@ -141,13 +141,46 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	auto glowOutline = gm->colorForIdx(gm->getPlayerGlowColor());
 	if (this->isPlayer2) std::swap(col1, col2);
 
+	SimplePlayer* sprite = SimplePlayer::create(0);
 	if (this->mode == IconType::Ship || this->mode == IconType::Ufo ||
 		this->mode == IconType::Jetpack
 	) {
-		// TODO: Mini Cube (y+5, scale .55)
+		auto miniPlayer = SimplePlayer::create(0);
+
+		miniPlayer->updatePlayerFrame(gm->getPlayerFrame(), IconType::Cube);
+		miniPlayer->setColors(
+			grayscale(gm->colorForIdx(col1)),
+			grayscale(gm->colorForIdx(col2))
+		);
+		miniPlayer->setGlowOutline(grayscale(glowOutline));
+		miniPlayer->enableCustomGlowColor(glowOutline);
+		if (!gm->getPlayerGlow())
+			miniPlayer->disableGlowOutline();
+
+		miniPlayer->setZOrder(-1);
+		miniPlayer->setAnchorPoint({ 0.5f, 0.5f });
+		miniPlayer->setOpacity(0xff / 2);
+
+		switch (this->mode) {
+			case IconType::Ship:
+				miniPlayer->setPosition({0, 10});
+				miniPlayer->setScale(0.55f);
+				break;
+			case IconType::Ufo:
+				miniPlayer->setPosition({0, 5});
+				miniPlayer->setScale(0.55f);
+				break;
+			case IconType::Jetpack:
+				miniPlayer->setPosition({6, 4});
+				miniPlayer->setScale(0.6f);
+				break;
+			// just to shut clang up
+			default: break;
+		}
+
+		sprite->addChild(miniPlayer);
 	}
 
-	SimplePlayer* sprite = SimplePlayer::create(0);
 	sprite->updatePlayerFrame(frameIcon, this->mode);
 	sprite->setColors(
 		grayscale(gm->colorForIdx(col1)),
@@ -165,9 +198,10 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 	}
 	sprite->setScale(1.0f / (1 << (preAnim + isMini)));
 
-	if (preAnim) sprite->setOpacity(0);
+	sprite->setOpacity(preAnim ? 0 : 0xff / 2);
 	sprite->setCascadeOpacityEnabled(true);
-	sprite->setPosition(this->pos);
+	sprite->setPosition(pos);
+	if (this->mode == IconType::Ship) sprite->setPosition(pos + CCPoint(0, -5));
 	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
 	sprite->setAnchorPoint({ 0.5f, 0.5f });
 	return sprite;
@@ -554,7 +588,7 @@ vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPosOnScre
 
 	if (to - from <= 1) return from;
 
-	auto middle = from + ((to - from) >> 1);
+	auto middle = from + ((to - from) / 2);
 
 	auto dist = parent->convertToWorldSpace((*middle)->pos).x;
 	if (dist > x) to = middle;
@@ -570,7 +604,7 @@ vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPos(
 
 	if (to - from <= 1) return from;
 
-	auto middle = from + ((to - from) >> 1);
+	auto middle = from + ((to - from) / 2);
 
 	if ((*middle)->pos.x > x) to = middle;
 	else from = middle;

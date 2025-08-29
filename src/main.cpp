@@ -288,11 +288,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 			auto child = static_cast<CCNode*>(children->objectAtIndex(i));
 			bool isCurrent = child->getZOrder() == CURRENT_ZORDER;
 
-			if (auto player = dynamic_cast<SimplePlayer*>(child)) {
-				// Ghost Marker
-				player->setOpacity((isCurrent ? 0xff : 0xff >> 1));
-			} else {
-				// Regular Marker
+			if (dynamic_cast<SimplePlayer*>(child) == nullptr) {
+				// Only for regular markers
 				child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
 				child->setRotation(-sceneRotation);
 			}
