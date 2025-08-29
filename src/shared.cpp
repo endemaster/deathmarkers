@@ -74,41 +74,28 @@ void DeathLocationMin::printCSV(ostream& os, bool hasPercentage) const {
 GhostLocation::GhostLocation(PlayerObject* player) :
 	DeathLocationMin(player->getPosition()) {
 	this->isPlayer2 = player->m_isSecondPlayer;
-	this->isMini = player->getScale() < 1.0f;
-	this->isFlipped = false; // TODO
-	this->isMirrored = false; // TODO
+	this->isMini = player->m_vehicleSize == 0.6f;
+	this->isFlipped = player->m_isUpsideDown;
+	this->isMirrored = player->m_isGoingLeft;
 	this->rotation = player->m_fRotationX;
 
-	switch (player->getActiveMode()) {
-    case GameObjectType::ShipPortal:
-			this->mode = player->m_isPlatformer ? IconType::Jetpack : IconType::Ship;
-			break;
-    case GameObjectType::BallPortal:
-			this->mode = IconType::Ball;
-			break;
-    case GameObjectType::UfoPortal:
-			this->mode = IconType::Ufo;
-			break;
-    case GameObjectType::WavePortal:
-			this->mode = IconType::Wave;
-			break;
-    case GameObjectType::RobotPortal:
-			this->mode = IconType::Robot;
-			break;
-    case GameObjectType::SpiderPortal:
-			this->mode = IconType::Spider;
-			break;
-    case GameObjectType::SwingPortal:
-			this->mode = IconType::Swing;
-			break;
-		default:
-    case GameObjectType::CubePortal:
-			this->mode = IconType::Cube;
-			break;
+	if (player->m_isShip) {
+		this->mode = player->m_isPlatformer ? IconType::Jetpack : IconType::Ship;
+	} else if (player->m_isBall) {
+		this->mode = IconType::Ball;
+	} else if (player->m_isBird) {
+		this->mode = IconType::Ufo;
+	} else if (player->m_isDart) {
+		this->mode = IconType::Wave;
+	} else if (player->m_isRobot) {
+		this->mode = IconType::Robot;
+	} else if (player->m_isSpider) {
+		this->mode = IconType::Spider;
+	} else if (player->m_isSwing) {
+		this->mode = IconType::Swing;
+	} else {
+		this->mode = IconType::Cube;
 	}
-
-	log::debug("p2 {} mini {} flip {} mirror {} rot {} mode1 {} mode2 {}", this->isPlayer2,
-		this->isMini, this->isFlipped, this->isMirrored, this->rotation, static_cast<int>(player->getActiveMode()), static_cast<int>(this->mode));
 }
 
 GhostLocation::GhostLocation(float x, float y) :
@@ -125,7 +112,7 @@ CCNode* GhostLocation::createAnimatedNode(
 			CCDelayTime::create(delay),
 			CCSpawn::createWithTwoActions(
 				CCEaseBounceOut::create(
-					CCScaleTo::create(fadeTime, 1)
+					CCScaleTo::create(fadeTime, isMini ? 0.6f : 1.0f)
 				),
 				CCFadeTo::create(fadeTime, 0xff >> 1)
 			)
@@ -172,14 +159,13 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 		sprite->disableGlowOutline();
 
 	sprite->setRotation(this->rotation);
-	if (this->isFlipped) sprite->m_fScaleY *= -1.f;
-	if (this->isMirrored) sprite->m_fScaleY *= -1.f;
-	if (this->isMini) sprite->setScale(0.5f);
-
-	if (preAnim) {
-		sprite->setScale(.5);
-		sprite->setOpacity(0);
+	if (mode != IconType::Ball && mode != IconType::Swing) {
+		if (this->isFlipped) sprite->m_fRotationX = 180.0f;
+		if (this->isMirrored) sprite->m_fRotationY = 180.0f;
 	}
+	sprite->setScale(1.0f / (1 << (preAnim + isMini)));
+
+	if (preAnim) sprite->setOpacity(0);
 	sprite->setCascadeOpacityEnabled(true);
 	sprite->setPosition(this->pos);
 	sprite->setZOrder(isCurrent ? CURRENT_ZORDER : OTHER_ZORDER);
