@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [Unreleased]
+
+### Added
+
+- Option for Ghost Cubes
+  - These only work in local mode and only start usage upon the setting being enabled
+
+### Changed
+
+- Calculate your identification on the client
+
+### Fixed
+
+- The first known death of a level now renders correctly
+- All markers are now drawn when changing to "Always show" while only a limited number are shown at the moment
+
 ## [1.4.0] - 2025-08-12
 
 ### Added
