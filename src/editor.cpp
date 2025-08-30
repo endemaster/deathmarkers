@@ -209,7 +209,8 @@ class $modify(DMEditorLayer, LevelEditorLayer) {
 		// Sort Deaths list along x-axis for better positional searching performance during clustering
 		sort(
 			this->m_fields->m_deaths.begin(),
-			this->m_fields->m_deaths.end()
+			this->m_fields->m_deaths.end(),
+			LocationComparer{}
 		);
 
 	}

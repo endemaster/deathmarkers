@@ -60,11 +60,6 @@ CCNode* DeathLocationMin::createNode(bool isCurrent, bool preAnim) const {
 	return sprite;
 }
 
-// Comparison based on x-position for common sorting (invoked by std::sort by default)
-bool DeathLocationMin::operator<(const DeathLocationMin& other) const {
-	return (this->pos.x < other.pos.x);
-};
-
 void DeathLocationMin::printCSV(ostream& os, bool hasPercentage) const {
 	os << this->pos.x << ',' << this->pos.y;
 	if (hasPercentage) os << ',' << this->percentage;
@@ -446,7 +441,11 @@ vector<unique_ptr<DeathLocationMin>> dm::getLocalDeaths(int levelId, bool hasPer
 	auto deathLoc = readCSVLine(buffer, hasPercentage);
 	if (deathLoc.has_value()) deaths.push_back(std::move(*deathLoc));
 	stream.close();
-	std::sort(deaths.begin(), deaths.end());
+	std::sort(
+		deaths.begin(),
+		deaths.end(),
+		LocationComparerPtr{}
+	);
 	return deaths;
 }
 
@@ -584,9 +583,10 @@ vector<std::string> dm::split(const std::string& string, const char at) {
 
 vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPosOnScreen(
 	vector<unique_ptr<DeathLocationMin>>::iterator from,
-	vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x) {
+	vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x,
+	bool preferHigher) {
 
-	if (to - from <= 1) return from;
+	if (to - from <= 1) return preferHigher ? to : from;
 
 	auto middle = from + ((to - from) / 2);
 
@@ -594,21 +594,22 @@ vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPosOnScre
 	if (dist > x) to = middle;
 	else from = middle;
 
-	return binarySearchNearestXPosOnScreen(from, to, parent, x);
+	return binarySearchNearestXPosOnScreen(from, to, parent, x, preferHigher);
 
 }
 
 vector<unique_ptr<DeathLocationMin>>::iterator dm::binarySearchNearestXPos(
 	vector<unique_ptr<DeathLocationMin>>::iterator from,
-	vector<unique_ptr<DeathLocationMin>>::iterator to, float x) {
+	vector<unique_ptr<DeathLocationMin>>::iterator to, float x,
+	bool preferHigher) {
 
-	if (to - from <= 1) return from;
+	if (to - from <= 1) return preferHigher ? to : from;
 
 	auto middle = from + ((to - from) / 2);
 
 	if ((*middle)->pos.x > x) to = middle;
 	else from = middle;
 
-	return binarySearchNearestXPos(from, to, x);
+	return binarySearchNearestXPos(from, to, x, preferHigher);
 
 }

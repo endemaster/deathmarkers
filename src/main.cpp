@@ -166,7 +166,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 						parseBinDeathList(res, &this->m_fields->m_deaths, !this->m_fields->m_levelProps.platformer);
 						sort(
 							this->m_fields->m_deaths.begin(),
-							this->m_fields->m_deaths.end()
+							this->m_fields->m_deaths.end(),
+							LocationComparerPtr{}
 						);
 						log::debug("Finished parsing.");
 						this->m_fields->m_fetched = true;
@@ -378,9 +379,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		// log::debug("{} {}", halfWinWidth, winDiagonal);
 
 		begin = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth - winDiagonal + min(lenience, 0.0f));
+			halfWinWidth - winDiagonal + min(lenience, 0.0f), false);
 		end = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth + winDiagonal + max(lenience, 0.0f));
+			halfWinWidth + winDiagonal + max(lenience, 0.0f), true);
 
 	}
 
@@ -390,7 +391,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 		auto end = this->m_fields->m_deaths.end();
 
 		findDeathRangeInFrame(begin, end);
-		log::debug("IN FRAME: from {} to {}", begin - this->m_fields->m_deaths.begin(), end - this->m_fields->m_deaths.begin());
 
 		renderMarkers(begin, end, animate);
 
@@ -589,7 +589,7 @@ class $modify(DMPlayerObject, PlayerObject) {
 			auto nearest = binarySearchNearestXPos(
 				playLayer->m_fields->m_deaths.begin(),
 				playLayer->m_fields->m_deaths.end(),
-				deathLoc->pos.x
+				deathLoc->pos.x, true
 			);
 
 			unique_ptr<DeathLocationMin> toShow;

@@ -116,6 +116,20 @@ namespace dm {
 		void updateNode();
 	};
 
+	struct LocationComparer {
+    bool operator()(const DeathLocationMin& a,
+                    const DeathLocationMin& b) const {
+        return a.pos.x < b.pos.x;
+    }
+	};
+
+	struct LocationComparerPtr {
+    bool operator()(const std::unique_ptr<DeathLocationMin>& a,
+                    const std::unique_ptr<DeathLocationMin>& b) const {
+        return a->pos.x < b->pos.x;
+    }
+	};
+
 	bool shouldSubmit(struct playingLevel& level, struct playerData& player);
 	bool willEverDraw(struct playingLevel& level);
 
@@ -136,11 +150,13 @@ namespace dm {
 
 	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPosOnScreen(
 		vector<unique_ptr<DeathLocationMin>>::iterator from,
-		vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x);
+		vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x,
+		bool preferHigher);
 
 	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPos(
 		vector<unique_ptr<DeathLocationMin>>::iterator from,
-		vector<unique_ptr<DeathLocationMin>>::iterator to, float x);
+		vector<unique_ptr<DeathLocationMin>>::iterator to, float x,
+		bool preferHigher);
 
 }
 
