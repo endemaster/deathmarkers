@@ -1,8 +1,13 @@
-<center><h1><img src="./logo.png" width="120" style="vertical-align: -100%"> DeathMarkers</h1>
-
+<p align="center"><img src="./logo.png" width=120></p>
+<h1 align="center">DeathMarkers</h1>
+<div align="center">
+  
 **Online death collection**, not only for fun Mario Maker-style Death Markers, but also for in-depth analysis of gameplay.
 
-### » [View Guide](https://deathmarkers.masp005.dev) ⫶ [Install on Geode](https://geode-sdk.org/mods/freakyrobot.deathmarkers) ⫶ [Join the Discord](https://discord.gg/hzDFNaNgCf) «</center>
+### » [View Guide](https://deathmarkers.masp005.dev) ⫶ [Install on Geode](https://geode-sdk.org/mods/freakyrobot.deathmarkers) ⫶ [Join the Discord](https://discord.gg/hzDFNaNgCf) «
+</div>
+
+---
 
 ## Installation
 
@@ -13,6 +18,7 @@ DeathMarkers is installed through [Geode](https://geode-sdk.org/), the mod can b
 - Show **other players' deaths** when you die
 - **Analyze** player deaths in your levels
 - Help creators **improve** their levels
+- **Track your deaths** in great detail for practice
 
 **Planned Features:**
 - Built-in analysis **helper tools**
