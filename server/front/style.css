@@ -36,6 +36,17 @@ li {
   line-height: 1.5;
 }
 
+nav {
+  text-align: center;
+  clear: both;
+  color: white;
+  padding-top: 1em;
+}
+
+nav > * {
+  color: white;
+}
+
 blockquote {
   display: block;
   padding: .5em 1em;
