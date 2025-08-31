@@ -188,8 +188,8 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 
 	sprite->setRotation(this->rotation);
 	if (mode != IconType::Ball && mode != IconType::Swing) {
-		if (this->isFlipped) sprite->m_fRotationX = 180.0f;
-		if (this->isMirrored) sprite->m_fRotationY = 180.0f;
+		if (this->isFlipped) sprite->m_fRotationX += 180.0f;
+		if (this->isMirrored) sprite->m_fRotationY += 180.0f;
 	}
 	sprite->setScale(1.0f / (1 << (preAnim + isMini)));
 
