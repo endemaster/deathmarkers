@@ -28,3 +28,10 @@ document.addEventListener("keypress", e => {
     zoomWrapper.close();
   }
 });
+
+[...document.querySelectorAll("nav > a")].forEach(link => {
+  if (link.href == location.href) {
+    link.removeAttribute("href");
+    link.style.fontWeight = "bold";
+  }
+})

@@ -3,7 +3,6 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include <vector>
 #include <string>
-#include <stdio.h>
 #include <stdlib.h>
 #include "shared.hpp"
 #include "submitter.hpp"
@@ -48,9 +47,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		bool m_willEverDraw = true;
 
 		// List of deaths
-		vector<DeathLocationMin> m_deaths;
+		vector<unique_ptr<DeathLocationMin>> m_deaths;
 		// Iterator to an entry in m_deaths pointing to the death that was last added
-		vector<DeathLocationMin>::iterator m_latest;
+		vector<unique_ptr<DeathLocationMin>>::iterator m_latest;
 		// List of pending submissions, used to send on level exit
 		vector<DeathLocationOut> m_submissions;
 
@@ -167,7 +166,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 						parseBinDeathList(res, &this->m_fields->m_deaths, !this->m_fields->m_levelProps.platformer);
 						sort(
 							this->m_fields->m_deaths.begin(),
-							this->m_fields->m_deaths.end()
+							this->m_fields->m_deaths.end(),
+							LocationComparerPtr{}
 						);
 						log::debug("Finished parsing.");
 						this->m_fields->m_fetched = true;
@@ -253,8 +253,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 
 	}
 
-	void renderMarkers(vector<DeathLocationMin>::iterator begin,
-		vector<DeathLocationMin>::iterator end, bool animate) {
+	void renderMarkers(vector<unique_ptr<DeathLocationMin>>::iterator begin,
+		vector<unique_ptr<DeathLocationMin>>::iterator end, bool animate) {
 
 		if (end == this->m_fields->m_deaths.end()) {
 			if (begin == end) return; // Nothing to draw
@@ -265,12 +265,12 @@ class $modify(DMPlayLayer, PlayLayer) {
 		double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
 		for (auto deathLoc = begin; deathLoc <= end; ++deathLoc) {
 			CCNode* node;
-			if (animate) node = deathLoc->createAnimatedNode(
+			if (animate) node = (*deathLoc)->createAnimatedNode(
 				deathLoc == this->m_fields->m_latest,
 				(static_cast<double>(rand()) / RAND_MAX) * fadeTime,
 				fadeTime
 			);
-			else node = deathLoc->createNode(deathLoc == this->m_fields->m_latest);
+			else node = (*deathLoc)->createNode(deathLoc == this->m_fields->m_latest);
 			this->m_fields->m_dmNode->addChild(node);
 		}
 		updateMarkers(0.0f);
@@ -289,8 +289,11 @@ class $modify(DMPlayLayer, PlayLayer) {
 			auto child = static_cast<CCNode*>(children->objectAtIndex(i));
 			bool isCurrent = child->getZOrder() == CURRENT_ZORDER;
 
-			child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
-			child->setRotation(-sceneRotation);
+			if (dynamic_cast<SimplePlayer*>(child) == nullptr) {
+				// Only for regular markers
+				child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
+				child->setRotation(-sceneRotation);
+			}
 		}
 
 	}
@@ -305,8 +308,8 @@ class $modify(DMPlayLayer, PlayLayer) {
 		int hist[101] = { 0 };
 
 		for (auto& deathLoc : this->m_fields->m_deaths) {
-			if (deathLoc.percentage >= 0 && deathLoc.percentage < 101)
-				hist[deathLoc.percentage]++;
+			if (deathLoc->percentage >= 0 && deathLoc->percentage < 101)
+				hist[deathLoc->percentage]++;
 		}
 
 		if (!this->m_fields->m_chartAttached) {
@@ -363,8 +366,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 	}
 
 	void findDeathRangeInFrame(
-		vector<DeathLocationMin>::iterator& begin,
-		vector<DeathLocationMin>::iterator& end, float lenience = 0.0f) {
+		vector<unique_ptr<DeathLocationMin>>::iterator& begin,
+		vector<unique_ptr<DeathLocationMin>>::iterator& end,
+		float lenience = 0.0f) {
 
 		// For all this jargon, see the "Screen Limit" slide in docs/doc.dio
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -375,9 +379,9 @@ class $modify(DMPlayLayer, PlayLayer) {
 		// log::debug("{} {}", halfWinWidth, winDiagonal);
 
 		begin = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth - winDiagonal + min(lenience, 0.0f));
+			halfWinWidth - winDiagonal + min(lenience, 0.0f), false);
 		end = binarySearchNearestXPosOnScreen(begin, end, this->m_objectLayer,
-			halfWinWidth + winDiagonal + max(lenience, 0.0f));
+			halfWinWidth + winDiagonal + max(lenience, 0.0f), true);
 
 	}
 
@@ -387,7 +391,6 @@ class $modify(DMPlayLayer, PlayLayer) {
 		auto end = this->m_fields->m_deaths.end();
 
 		findDeathRangeInFrame(begin, end);
-		log::debug("IN FRAME: from {} to {}", begin - this->m_fields->m_deaths.begin(), end - this->m_fields->m_deaths.begin());
 
 		renderMarkers(begin, end, animate);
 
@@ -465,7 +468,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			// = markers are not redrawn, but new one should appear
 
 			double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
-			auto node = this->m_fields->m_latest->createAnimatedNode(
+			auto node = (*this->m_fields->m_latest)->createAnimatedNode(
 				true, 0, fadeTime
 			);
 			this->m_fields->m_dmNode->addChild(node);
@@ -568,28 +571,40 @@ class $modify(DMPlayerObject, PlayerObject) {
 		int percent = playLayer->m_fields->m_levelProps.platformer ?
 			static_cast<int>(playLayer->m_attemptTime) :
 			playLayer->getCurrentPercentInt();
-		auto deathLoc = DeathLocationOut(this->getPosition());
-		deathLoc.percentage = percent;
-		// deathLoc.coin1 = ...; // This stuff is complicated... prolly gonna pr Weebifying/coins-in-pause-menu-geode to make it api public and depend on it here or sm
-		// deathLoc.coin2 = ...;
-		// deathLoc.coin3 = ...;
-		// deathLoc.itemdata = ...; // where the hell are the counters
+		auto deathLoc = std::make_unique<DeathLocationOut>
+			(DeathLocationOut{this->getPosition()});
+		deathLoc->percentage = percent;
+		// deathLoc->coin1 = ...; // This stuff is complicated... prolly gonna pr Weebifying/coins-in-pause-menu-geode to make it api public and depend on it here or sm
+		// deathLoc->coin2 = ...;
+		// deathLoc->coin3 = ...;
+		// deathLoc->itemdata = ...; // where the hell are the counters
 
 		bool isPractice = playLayer->m_fields->m_levelProps.practice ||
 			playLayer->m_fields->m_levelProps.testmode;
-		deathLoc.practice = isPractice;
+		deathLoc->practice = isPractice;
+
+		playLayer->m_fields->m_submissions.push_back(*deathLoc);
 
 		if (!playLayer->m_fields->m_normalOnly || !isPractice) {
 			auto nearest = binarySearchNearestXPos(
 				playLayer->m_fields->m_deaths.begin(),
 				playLayer->m_fields->m_deaths.end(),
-				deathLoc.pos.x
+				deathLoc->pos.x, true
 			);
-			playLayer->m_fields->m_latest =
-				playLayer->m_fields->m_deaths.insert(nearest, deathLoc);
-		}
 
-		playLayer->m_fields->m_submissions.push_back(deathLoc);
+			unique_ptr<DeathLocationMin> toShow;
+			if (Mod::get()->getSettingValue<bool>("use-ghost-cube") &&
+				playLayer->m_fields->m_useLocal
+			) {
+				auto showGhost = std::make_unique<GhostLocation>(GhostLocation(this));
+				showGhost->percentage = percent;
+				toShow = std::move(showGhost);
+			} else
+				toShow = std::move(deathLoc);
+
+			playLayer->m_fields->m_latest =
+				playLayer->m_fields->m_deaths.insert(nearest, std::move(toShow));
+		}
 		playLayer->checkDraw(DEATH);
 
 	}

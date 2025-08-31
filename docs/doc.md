@@ -182,15 +182,40 @@ Changed: Use local deaths (boolean) -> Use local death (enum)
 
 | Old Value | New Value |
 |-|-|
-| false | "Never" |
+| `false` | "Never" |
 | | "Demons only" |
-| true | "Always |
+| `true` | "Always |
 
 Changed: Always show Markers & Markers in Practice -> When to draw in normal mode & "-" practice mode
 
 | Always show Markers | Markers in Practice | When to draw in normal mode | "-" practice mode |
 |-|-|-|-|
-| false | false | "On Death" | "Never" |
-| false | true | "On Death" | "On Death" |
-| true | false | "Always" | "Never" |
-| true | true | "Always" | "Always" |
+| `false` | `false` | "On Death" | "Never" |
+| `false` | `true` | "On Death" | "On Death" |
+| `true` | `false` | "Always" | "Never" |
+| `true` | `true` | "Always" | "Always" |
+
+## Local Deaths
+
+Local deaths are stored in the mod's data folder (`%localappdata%/GeometryDash/geode/mods/freakyrobot.deathmarkers`) as files named the ID of the level it belongs to.
+
+They are formatted similar to **CSV**, storing a specific order of data points about the level. However, the file contains no header line and lines may contain a different number of values.
+
+Lines may contain 2 or 3 (for regular markers) or 5 or 6 (for ghost markers) values. 3 and 6 contain an extra value at the end for **percentage**, only if the level is a normal mode level.
+
+Values on regular markers:
+- x-Position
+- y-Position
+- (Percentage)
+
+Values on ghost markers:
+- x-Position
+- y-Position
+- Rotation
+- Gamemode (as internal value of the enum IconType)
+- boolean metadata bitfield:
+  - Bit 0 (value 1): is second player
+  - Bit 1 (value 2): is mini
+  - Bit 2 (value 4): gravity is flipped
+  - Bit 3 (value 8): gameplay is mirrored
+- (Percentage)

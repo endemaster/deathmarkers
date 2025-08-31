@@ -16,6 +16,9 @@ namespace dm {
 	
 	constexpr int CURRENT_ZORDER = 2 << 29;
 	constexpr int OTHER_ZORDER = (2 << 29) - 1;
+	constexpr float GS_WEIGHT_RED = 0.299;
+	constexpr float GS_WEIGHT_GREEN = 0.587;
+	constexpr float GS_WEIGHT_BLUE = 0.114;
 
 	struct playerData {
 		std::string username = "";
@@ -44,10 +47,32 @@ namespace dm {
 		DeathLocationMin(CCPoint pos);
 
 		CCNode* createNode(bool isCurrent) const;
-		CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
-		CCNode* createNode(bool isCurrent, bool preAnim) const;
+		virtual CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime) const;
+		virtual CCNode* createNode(bool isCurrent, bool preAnim) const;
+		virtual void printCSV(ostream& os, bool hasPercentage) const;
 
 		bool operator<(const DeathLocationMin& other) const;
+	};
+
+	// Dynamic replacement for DeathLocationMin when using Ghost Cubes
+	// Stores additional needed information and overrides rendering
+	class GhostLocation : public DeathLocationMin {
+	public:
+		float rotation;
+		IconType mode;
+		bool isPlayer2;
+		bool isMini;
+		bool isFlipped;
+		bool isMirrored;
+
+		GhostLocation(PlayerObject* player);
+		GhostLocation(float x, float y);
+		GhostLocation(float x, float y, int percentage);
+		
+		CCNode* createAnimatedNode(bool isCurrent, double delay, double fadeTime)
+			const override;
+		CCNode* createNode(bool isCurrent, bool preAnim) const override;
+		void printCSV(ostream& os, bool hasPercentage) const override;
 	};
 
 	// Holds all information about a death location that can be sent to the server
@@ -91,29 +116,47 @@ namespace dm {
 		void updateNode();
 	};
 
+	struct LocationComparer {
+    bool operator()(const DeathLocationMin& a,
+                    const DeathLocationMin& b) const {
+        return a.pos.x < b.pos.x;
+    }
+	};
+
+	struct LocationComparerPtr {
+    bool operator()(const std::unique_ptr<DeathLocationMin>& a,
+                    const std::unique_ptr<DeathLocationMin>& b) const {
+        return a->pos.x < b->pos.x;
+    }
+	};
+
 	bool shouldSubmit(struct playingLevel& level, struct playerData& player);
 	bool willEverDraw(struct playingLevel& level);
 
 	std::string makeRequestURL(char const* endpoint);
+	ccColor3B grayscale(ccColor3B const& color);
 
-	vector<DeathLocationMin> getLocalDeaths(int levelId, bool hasPercentage);
-	void storeLocalDeaths(int levelId, vector<DeathLocationMin>& deaths,
+	vector<unique_ptr<DeathLocationMin>> getLocalDeaths(int levelId,
 		bool hasPercentage);
+	void storeLocalDeaths(int levelId,
+		vector<unique_ptr<DeathLocationMin>> const& deaths, bool hasPercentage);
 
 	void parseBinDeathList(web::WebResponse* res,
-		vector<DeathLocationMin>* target, bool hasPercentage);
+		vector<unique_ptr<DeathLocationMin>>* target, bool hasPercentage);
 	void parseBinDeathList(web::WebResponse* res,
 		vector<DeathLocation>* target);
 
 	vector<std::string> split(const std::string& string, const char at);
 
-	vector<DeathLocationMin>::iterator binarySearchNearestXPosOnScreen(
-		vector<DeathLocationMin>::iterator from,
-		vector<DeathLocationMin>::iterator to, CCLayer* parent, float x);
+	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPosOnScreen(
+		vector<unique_ptr<DeathLocationMin>>::iterator from,
+		vector<unique_ptr<DeathLocationMin>>::iterator to, CCLayer* parent, float x,
+		bool preferHigher);
 
-	vector<DeathLocationMin>::iterator binarySearchNearestXPos(
-		vector<DeathLocationMin>::iterator from,
-		vector<DeathLocationMin>::iterator to, float x);
+	vector<unique_ptr<DeathLocationMin>>::iterator binarySearchNearestXPos(
+		vector<unique_ptr<DeathLocationMin>>::iterator from,
+		vector<unique_ptr<DeathLocationMin>>::iterator to, float x,
+		bool preferHigher);
 
 }
 
