@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
-## [Unreleased]
+## [1.5.0] - 2025-09-01
 
 ### Added
 
