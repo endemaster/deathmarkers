@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
 #include <Geode/ui/GeodeUI.hpp>
+#include <Geode/platform/platform.hpp>
 #include <vector>
 #include <string>
 #include <stdlib.h>
@@ -289,7 +290,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			auto child = static_cast<CCNode*>(children->objectAtIndex(i));
 			bool isCurrent = child->getZOrder() == CURRENT_ZORDER;
 
-			if (dynamic_cast<SimplePlayer*>(child) == nullptr) {
+			if (!cast::typeinfo_cast<SimplePlayer*>(child)) {
 				// Only for regular markers
 				child->setScale((isCurrent ? 1.5f : 1.0f) * inverseScale);
 				child->setRotation(-sceneRotation);
@@ -436,7 +437,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 		}
 
 		if (should != this->m_fields->m_drawn) {
-			log::debug("Toggling...");
+			// log::debug("Toggling...");
 
 			switch (should) {
 				case NONE:
