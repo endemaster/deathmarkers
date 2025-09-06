@@ -151,7 +151,7 @@
 			"min": 0,
 			"max": 255,
 			"default": 64,
-			"controls": {
+			"control": {
 				"arrows": false,
 				"big-arrows": false,
 				"slider": true,
