@@ -101,6 +101,10 @@ GhostLocation::GhostLocation(float x, float y, int percentage) :
 
 CCNode* GhostLocation::createAnimatedNode(
 	bool isCurrent, double delay, double fadeTime) const {
+
+	if (!GhostLocation::shouldUse)
+		return DeathLocationMin::createAnimatedNode(isCurrent, delay, fadeTime);
+
 	auto node = this->createNode(isCurrent, true);
 	if (delay || fadeTime)
 		node->runAction(CCSequence::createWithTwoActions(
@@ -116,6 +120,10 @@ CCNode* GhostLocation::createAnimatedNode(
 }
 
 CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
+
+	if (!GhostLocation::shouldUse)
+		return DeathLocationMin::createNode(isCurrent, preAnim);
+
 	auto gm = GameManager::sharedState();
 
 	int frameIcon;
@@ -203,7 +211,7 @@ CCNode* GhostLocation::createNode(bool isCurrent, bool preAnim) const {
 }
 
 void GhostLocation::printCSV(ostream& os, bool hasPercentage) const {
-	uint8_t flagField;
+	uint8_t flagField = 0;
 	flagField |= (this->isPlayer2 << 0);
 	flagField |= (this->isMini << 1);
 	flagField |= (this->isFlipped << 2);
@@ -276,7 +284,7 @@ bool dm::shouldSubmit(struct playingLevel& level, struct playerData& player) {
 
 bool dm::willEverDraw(struct playingLevel& level) {
 	auto playLayer = PlayLayer::get();
-	auto mod = Mod::get();
+	// auto mod = Mod::get();
 
 	if (!playLayer) return false;
 	if (level.levelId == 0) return false; // Don't draw on local levels

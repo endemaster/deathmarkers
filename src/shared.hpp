@@ -64,6 +64,7 @@ namespace dm {
 		bool isMini;
 		bool isFlipped;
 		bool isMirrored;
+		static inline bool shouldUse = false;
 
 		GhostLocation(PlayerObject* player);
 		GhostLocation(float x, float y);

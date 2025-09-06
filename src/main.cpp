@@ -94,10 +94,11 @@ class $modify(DMPlayLayer, PlayLayer) {
 		this->m_fields->m_levelProps.practice = this->m_isPracticeMode;
 		this->m_fields->m_levelProps.testmode = this->m_isTestMode;
 
-		std::string storeLocalStr = Mod::get()->getSettingValue<std::string>("store-local-2");
+		std::string storeLocalStr = mod->getSettingValue<std::string>("store-local-2");
 		this->m_fields->m_useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 			this->m_level->m_stars >= 10;
-		this->m_fields->m_normalOnly = Mod::get()->getSettingValue<bool>("normal-only");
+		this->m_fields->m_normalOnly = mod->getSettingValue<bool>("normal-only");
+		GhostLocation::shouldUse = mod->getSettingValue<bool>("use-ghost-cube");
 
 		log::debug("{} {} {}", storeLocalStr, this->m_level->m_stars, this->m_fields->m_useLocal);
 
@@ -650,6 +651,7 @@ class $modify(DMPauseLayer, PauseLayer) {
 						auto useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 							playLayer->m_level->m_stars >= 10;
 						auto normalOnly = mod->getSettingValue<bool>("normal-only");
+						GhostLocation::shouldUse = mod->getSettingValue<bool>("use-ghost-cube");
 
 						playLayer->checkDraw(PAUSE);
 
