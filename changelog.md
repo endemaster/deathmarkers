@@ -7,15 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [1.5.1] - 2025-09-06
+
+### Changed
+
+- Cross-platform support fix
+
+### Fixed
+
+- Controls on "Darkener in Editor" setting are now as intended
+- Markers no longer render as ghosts if the setting is disabled
+
 ## [1.5.0] - 2025-09-01
 
 ### Added
 
-- Option for Ghost Cubes
+- Option for Ghost Cubes ([#9](https://github.com/MaSp005/deathmarkers/issues/9))
   - These only work in local mode and only start usage upon the setting being enabled
 
 ### Changed
 
+- Upgrade to Geode v4.8.0
 - Calculate your identification on the client
 
 ### Fixed
