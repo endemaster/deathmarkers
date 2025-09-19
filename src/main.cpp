@@ -244,13 +244,14 @@ class $modify(DMPlayLayer, PlayLayer) {
 		PlayLayer::onQuit();
 		this->submitDeaths();
 
-		if (!this->m_fields->m_useLocal) return;
+		if (this->m_fields->m_useLocal && this->m_fields->m_willEverDraw) {
+			storeLocalDeaths(
+				this->m_fields->m_levelProps.levelId,
+				this->m_fields->m_deaths,
+				!this->m_fields->m_levelProps.platformer
+			);
+		}
 
-		storeLocalDeaths(
-			this->m_fields->m_levelProps.levelId,
-			this->m_fields->m_deaths,
-			!this->m_fields->m_levelProps.platformer
-		);
 		this->m_fields->m_deaths.clear();
 
 	}
@@ -648,6 +649,8 @@ class $modify(DMPauseLayer, PauseLayer) {
 						auto mod = Mod::get();
 
 						auto playLayer = static_cast<DMPlayLayer*>(PlayLayer::get());
+						if (!playLayer->m_fields->m_willEverDraw) return;
+
 						auto storeLocalStr = mod->getSettingValue<std::string>("store-local-2");
 						auto useLocal = storeLocalStr == "Always" ? true : storeLocalStr == "Never" ? false :
 							playLayer->m_level->m_stars >= 10;
