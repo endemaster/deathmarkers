@@ -402,7 +402,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 	DMDrawScope shouldDraw() {
 
 		if (!this->m_fields->m_willEverDraw) return NONE;
-		
+
 		auto mod = Mod::get();
 		auto pauseSetting = mod->getSettingValue<bool>("show-in-pause");
 		if (pauseSetting && this->m_isPaused) return LOCAL;
@@ -468,6 +468,7 @@ class $modify(DMPlayLayer, PlayLayer) {
 			this->m_fields->m_drawn = should;
 		} else if (event == DEATH && should) {
 			// = markers are not redrawn, but new one should appear
+			if (this->m_fields->m_latest == this->m_fields->m_deaths.end()) return;
 
 			double fadeTime = Mod::get()->getSettingValue<float>("fade-time") / 2;
 			auto node = (*this->m_fields->m_latest)->createAnimatedNode(
