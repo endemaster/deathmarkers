@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [1.5.2] - 2025-09-19
+
+### Fixed
+
+- No longer crash on death when using "always show" and "normal only" in practice mode ([#10](https://github.com/MaSp005/deathmarkers/issues/10))
+- Suppress warning about changed settings when markers will never show
+- No longer save local deaths to "0" file on local levels
+
 ## [1.5.1] - 2025-09-06
 
 ### Changed
@@ -77,7 +85,7 @@ This document only concerns the changelog of the **Mod**, not the server.
 
 - Ability to hide practice mode deaths ([#5](https://github.com/MaSp005/deathmarkers/issues/5))
 - Setting to adjust API URL
-- Spam prevention and warning within the mod.
+- Spam prevention and warning within the mod
 
 ## [1.2.1] - 2025-05-04
 
@@ -130,7 +138,7 @@ This document only concerns the changelog of the **Mod**, not the server.
 
 ### Fixed
 
-- Fix the game crashing when the editor pause menu is opened a second time if Relocate Build Tools is not installed. ([#1](https://github.com/MaSp005/deathmarkers/issues/1))
+- Fix the game crashing when the editor pause menu is opened a second time if Relocate Build Tools is not installed ([#1](https://github.com/MaSp005/deathmarkers/issues/1))
 
 ## [1.0.1] - 2025-04-18
 
