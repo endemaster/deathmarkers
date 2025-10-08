@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This document only concerns the changelog of the **Mod**, not the server.
 
+## [1.5.3] - 2025-10-08
+
+### Changed
+
+- Upgrade to Geode v4.9.0
+
+### Fixed
+- No longer crash after 30 seconds if submission of deaths fails. ([#12](https://github.com/MaSp005/deathmarkers/issues/12))
+
 ## [1.5.2] - 2025-09-19
 
 ### Fixed
