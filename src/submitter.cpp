@@ -17,37 +17,40 @@ Submitter::~Submitter() {}
 void Submitter::event(web::WebTask::Event* e) {
 	auto res = e->getValue();
 	if (res) {
-		if (!res->ok()) {
-			int code = res->code();
-			auto body = res->string().unwrapOr("Unknown");
+		if (res->ok()) {
+			log::debug("Posted Deaths.");
+			drop();
+			return;
+		}
 
-			log::error("Posting Deaths failed: {} {}", code, body);
+		int code = res->code();
+		auto body = res->string().unwrapOr("Unknown");
 
-			if (code == 429) {
-				auto timeoutHeader = res->header("Retry-After");
-				auto timeout = timeoutHeader.has_value() ?
-					std::chrono::seconds(atoi(timeoutHeader->c_str())) :
-					RETRY_TIMEOUT;
+		log::error("Posting Deaths failed: {} {}", code, body);
 
-				log::debug("Hit rate limit, using Retry-After header...");
-				std::thread([this, timeout]() {
-					std::this_thread::sleep_for(timeout);
-					this->submit();
-				}).detach();
+		if (code == 429) {
+			auto timeoutHeader = res->header("Retry-After");
+			auto timeout = timeoutHeader.has_value() ?
+				std::chrono::seconds(atoi(timeoutHeader->c_str())) :
+				RETRY_TIMEOUT;
 
-			} else if (code >= 400 && code < 500) {
-				log::debug("Dropping submission due to 4xx error response.");
+			log::debug("Hit rate limit, using Retry-After header...");
+			std::thread([this, timeout]() {
+				std::this_thread::sleep_for(timeout);
+				this->submit();
+			}).detach();
 
-			} else if (code >= 500 && code < 600 || code < 0) { // whatever 6xx responses mean
-				log::debug("Waiting to retry...");
-				std::thread([this]() {
-					std::this_thread::sleep_for(RETRY_TIMEOUT);
-					this->submit();
-				}).detach();
-			}
-		} else log::debug("Posted Deaths.");
-		// what can i say except
-		delete this;
+		} else if (code >= 400 && code < 500) {
+			log::warn("Dropping submission due to 4xx error response.");
+			drop();
+
+		} else if (code >= 500 && code < 600 || code < 0) { // whatever 6xx responses mean
+			log::debug("Waiting to retry...");
+			std::thread([this]() {
+				std::this_thread::sleep_for(RETRY_TIMEOUT);
+				this->submit();
+			}).detach();
+		}
 	}
 	else if (e->isCancelled()) {
 		log::error("Posting Death was cancelled. I DONT KNOW WHAT HAPPENED IM JUST GONNA DO NOTHING AND PRAY");
@@ -56,11 +59,15 @@ void Submitter::event(web::WebTask::Event* e) {
 	}
 }
 
+void Submitter::drop() {
+	delete this;
+}
+
 void Submitter::submit() {
 	log::debug("Sending request... (Retry {})", this->retries);
 	if (retries >= MAX_RETRIES) {
 		log::warn("Hit maximum retry count. Dropping submission.");
-		delete this;
+		drop();
 		return;
 	}
 	retries++;

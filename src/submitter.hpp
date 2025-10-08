@@ -19,6 +19,7 @@ private:
   EventListener<web::WebTask> listener;
 
 	void event(web::WebTask::Event* e);
+  void drop();
 
 public:
   Submitter(web::WebRequest request);
