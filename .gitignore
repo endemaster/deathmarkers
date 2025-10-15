@@ -68,5 +68,6 @@ server/node_modules
 **.db
 config.json
 server/exclude
+server/docker-compose.yml
 
 pdns/*.png
