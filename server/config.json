@@ -1,0 +1,15 @@
+{
+  "PORT": null,
+  "DATABASE": {
+    "SCRIPT": "dummy",
+    "POSTGRES": {
+      "database": "",
+      "user": "",
+      "password": ""
+    }
+  },
+  "RATELIMIT": {
+    "window": 10000,
+    "limit": 3
+  }
+}
