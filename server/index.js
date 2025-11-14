@@ -150,13 +150,37 @@ function createUserIdent(userid, username, levelid) {
 }
 
 app.get("/list", rateLimit, async (req, res) => {
-  if (!req.query.levelid) return res.sendStatus(400);
-  if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
-  if (req.query.platformer != "true" && req.query.platformer != "false")
+  const { levelid, platformer, practice } = req.query;
+
+  if (!levelid || !/^\d+$/.test(levelid)) return res.sendStatus(400);
+  const levelId = parseInt(levelid, 10);
+
+  // platformer: accept "true"/"false" *or* "1"/"0" *or* missing
+  let isPlatformer;
+  if (platformer === "true" || platformer === "1") {
+    isPlatformer = true;
+  } else if (
+    platformer === "false" ||
+    platformer === "0" ||
+    platformer === undefined
+  ) {
+    isPlatformer = false;
+  } else {
+    // any weird value → bad request
     return res.sendStatus(400);
-  let levelId = parseInt(req.query.levelid);
-  let isPlatformer = req.query.platformer == "true";
-  let inclPractice = req.query.practice != "false";
+  }
+
+  // practice: treat "false" or "0" as false, anything else as true
+  const inclPractice = practice !== "false" && practice !== "0";
+
+  let accept = req.query.response || "csv";
+  if (accept != "csv" && accept != "bin") return res.sendStatus(400);
+
+  let { deaths, columns } = await db.list(levelId, isPlatformer, inclPractice);
+
+  res.contentType(accept == "csv" ? "text/csv" : "application/octet-stream");
+  (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
+});
 
   let accept = req.query.response || "csv";
   if (accept != "csv" && accept != "bin") return res.sendStatus(400);
