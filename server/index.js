@@ -182,16 +182,6 @@ app.get("/list", rateLimit, async (req, res) => {
   (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
 });
 
-  let accept = req.query.response || "csv";
-  if (accept != "csv" && accept != "bin") return res.sendStatus(400);
-
-  let { deaths, columns } = await db.list(levelId, isPlatformer, inclPractice);
-
-  res.contentType(accept == "csv" ? "text/csv" : "application/octet-stream");
-
-  (accept == "csv" ? csvStream : binaryStream)(deaths, columns).pipe(res);
-});
-
 app.get("/analysis", rateLimit, async (req, res) => {
   if (!req.query.levelid) return res.sendStatus(400);
   if (!/^\d+$/.test(req.query.levelid)) return res.sendStatus(418);
@@ -314,62 +304,6 @@ app.all("*", (req, res) => {
 });
 
 const port = process.env.PORT || PORT || 3000;
-
-const dbScript = require("./database/dummy.js");
-
-// GET /list?levelid=123&platformer=1&practice=0
-app.get("/list", async (req, res) => {
-    try {
-        const levelId = req.query.levelid;
-        const isPlatformer = req.query.platformer === "1";
-        const inclPractice = req.query.practice === "1";
-
-        if (!levelId)
-            return res.status(400).json({ error: "Missing levelid" });
-
-        const result = await dbScript.list(levelId, isPlatformer, inclPractice);
-        res.json(result);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Internal error" });
-    }
-});
-
-// GET /analysis?levelid=123&columns=x,y
-app.get("/analysis", async (req, res) => {
-    try {
-        const levelId = req.query.levelid;
-        const columns = req.query.columns || "x,y";
-
-        if (!levelId)
-            return res.status(400).json({ error: "Missing levelid" });
-
-        const result = await dbScript.analyze(levelId, columns);
-        res.json(result);
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Internal error" });
-    }
-});
-
-// POST /submit
-// Body contains metadata + deaths[]
-app.post("/submit", async (req, res) => {
-    try {
-        const metadata = req.body.metadata;
-        const deaths = req.body.deaths;
-
-        if (!metadata || !deaths)
-            return res.status(400).json({ error: "Missing metadata or deaths" });
-
-        await dbScript.register(metadata, deaths);
-        res.json({ ok: true });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: "Internal error" });
-    }
-});
-
 
 app.listen(port, "0.0.0.0", () => {
   console.log("Listening on :" + port);
