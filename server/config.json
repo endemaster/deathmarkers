@@ -1,5 +1,5 @@
 {
-  "PORT": null,
+  "PORT": 3000,
   "DATABASE": {
     "SCRIPT": "dummy",
     "POSTGRES": {
