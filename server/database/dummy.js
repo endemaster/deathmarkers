@@ -1,24 +1,20 @@
 module.exports = {
   list: async (levelId, isPlatformer, inclPractice) => {
-    const columns = isPlatformer
-      ? "userident,levelversion,practice,x,y"
-      : "userident,levelversion,practice,x,y,percentage";
-
     return {
-      columns,
+      columns: isPlatformer
+        ? "x,y"
+        : "x,y,percentage",
       deaths: [
-        [
-          "0123456789abcdef0123456789abcdef01234567",
-          0, // levelversion
-          0, // practice
-          100.0, // x
-          200.0, // y
-          ...(isPlatformer ? [] : [37])
-        ]
+        isPlatformer
+          ? [100.0, 200.0]
+          : [100.0, 200.0, 37]
       ]
     };
   },
 
-  analyze: async () => [],
+  analyze: async () => {
+    return [];
+  },
+
   register: async () => {}
 };
