@@ -85,8 +85,6 @@ Everyone playing logged in will be uniquely identified. Everyone else is assumed
 
 **Base URL**: `https://deathmarkers.masp005.dev/`
 
-Every request and response body is in the format **JSON** (MIME-Type `application/json`).
-
 ### GET `/list`
 
 Parameter(s):
@@ -127,7 +125,7 @@ Parameter(s):
 
 - `levelid`: The ID of the level requested.
 
-Body Data (`application/json`):
+Body Data (In JSON, i.e. MIME `application/json`):
 
 - `format`: (int): Format Version Number, for the following always 1.
 - Fallback: `levelid` (int): The ID of the level. (Required only if equivalent parameter is not given)
