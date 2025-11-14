@@ -6,15 +6,18 @@ if (process.argv.includes("--help") || process.argv.includes("-h")) {
 }
 
 const {
-  PORT, DATABASE, RATELIMIT
-} = require("./config.json");
+  DATABASE_DRIVER,
+  RATELIMIT_WINDOW,
+  RATELIMIT_LIMIT
+} = process.env;
+const PORT = 8048;
 const BUFFER_SIZE = 500; // # of deaths to push at once
 const BINARY_VERSION = 1; // Incremental
 const alphabet = "ABCDEFGHIJOKLMNOPQRSTUVWXYZabcdefghijoklmnopqrstuvwxyz0123456789";
 const random = l => new Array(l).fill(0)
   .map(_ => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
 
-const db = require("./database/" + DATABASE.SCRIPT);
+const db = require("./database/" + DATABASE_DRIVER);
 const expr = require("express");
 const app = expr();
 const crypto = require("crypto");
@@ -27,8 +30,8 @@ const { Readable } = require("stream");
 app.use(expr.static("front"));
 app.set('trust proxy', 1);
 const rateLimit = require("express-rate-limit").rateLimit({
-  windowMs: RATELIMIT.window,
-  limit: RATELIMIT.limit,
+  windowMs: parseInt(RATELIMIT_WINDOW),
+  limit: parseInt(RATELIMIT_LIMIT),
   skipFailedRequests: true
 });
 
@@ -207,11 +210,12 @@ app.get("/analysis", rateLimit, async (req, res) => {
 });
 
 app.all("/submit", rateLimit, expr.text({
-  type: "*/*"
+  type: _ => true
 }), async (req, res) => {
   try {
     req.body = JSON.parse(req.body.toString());
-  } catch {
+  } catch (e) {
+    console.log(e, req);
     return res.status(400).send("Wrongly formatted JSON");
   }
   let format;
@@ -289,7 +293,7 @@ app.get("/robots.txt", (req, res) => {
   res.send(robots);
 });
 
-app.get("*", (req, res) => {
+app.get("*e", (req, res) => {
   guide = req.path.slice(1) || "index";
   if (guide in guideHtml) {
     res.header("Cross-Origin-Opener-Policy", "same-origin");
@@ -299,7 +303,7 @@ app.get("*", (req, res) => {
   } else res.redirect("/");
 });
 
-app.all("*", (req, res) => {
+app.all("*e", (req, res) => {
   res.redirect("/");
 });
 

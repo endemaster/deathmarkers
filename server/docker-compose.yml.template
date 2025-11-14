@@ -1,0 +1,44 @@
+services:
+  deathmarkers:
+    build: .
+    restart: always
+    ports:
+      - "8048:8048"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_DRIVER: "postgres"
+      DATABASE_HOST: "postgres"
+      DATABASE_NAME: "deathmarkers"
+      DATABASE_USER: "server"
+      DATABASE_PASSWORD: "example"
+      RATELIMIT_WINDOW: 10000
+      RATELIMIT_LIMIT: 3
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: "server"
+      POSTGRES_DB: "deathmarkers"
+      POSTGRES_PASSWORD: "example"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=server --dbname=deathmarkers"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

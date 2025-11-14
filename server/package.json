@@ -14,15 +14,15 @@
     "type": "git"
   },
   "dependencies": {
-    "@mdit-vue/plugin-frontmatter": "^2.1.4",
-    "express": "^4.21.1",
-    "express-rate-limit": "^7.5.0",
+    "@mdit-vue/plugin-frontmatter": "^3.0.2",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
     "markdown-it": "^14.1.0",
     "markdown-it-named-headings": "^1.1.0",
     "pg-format": "^1.0.4"
   },
   "optionalDependencies": {
-    "pg": "^8.14.1",
+    "pg": "^8.16.3",
     "terminal-kit": "^3.1.2"
   }
 }
