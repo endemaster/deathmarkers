@@ -291,7 +291,7 @@ app.all("*", (req, res) => {
 
 const port = process.env.PORT || PORT || 3000;
 
-const dbScript = require("./dummy.js"); // or postgres.js if you switch later
+const dbScript = require("./database/dummy.js");
 
 // GET /list?levelid=123&platformer=1&practice=0
 app.get("/list", async (req, res) => {
