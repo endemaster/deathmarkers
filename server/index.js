@@ -17,6 +17,10 @@ const alphabet = "ABCDEFGHIJOKLMNOPQRSTUVWXYZabcdefghijoklmnopqrstuvwxyz01234567
 const random = l => new Array(l).fill(0)
   .map(_ => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
 
+console.log("DATABASE_DRIVER =", DATABASE_DRIVER);
+
+// what am i doing with my life
+
 const db = require("./database/" + DATABASE_DRIVER);
 const expr = require("express");
 const app = expr();
