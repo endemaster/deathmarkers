@@ -9,7 +9,7 @@
     }
   },
   "RATELIMIT": {
-    "window": 10000,
-    "limit": 3
+    "window": 25000,
+    "limit": 2
   }
 }
